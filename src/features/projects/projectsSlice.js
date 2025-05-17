@@ -13,6 +13,22 @@ export const fetchAllProjects = createAsyncThunk('projects/fetchAll', async () =
   return await fetchProjects();
 };
 
+// Async thunk to create a project
+export const createProject = createAsyncThunk(
+  'projects/create',
+  async (projectData, { dispatch }) => {
+    try {
+      dispatch(updateProjectStatus('loading'));
+      const result = await createNewProject(projectData);
+      dispatch(updateProjectStatus('succeeded'));
+      return result;
+    } catch (error) {
+      dispatch(updateProjectStatus('failed'));
+      throw error;
+    }
+  }
+);
+
 export const projectsSlice = createSlice({
   name: 'projects',
   initialState,
@@ -61,25 +77,13 @@ export const projectsSlice = createSlice({
       .addCase(fetchAllProjects.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+      // You can add more cases for createProject here if needed
+      .addCase(createProject.fulfilled, (state, action) => {
+        // Handle successful creation if needed
       });
   }
 });
-
-// Async thunk to create a project
-export const createProject = createAsyncThunk(
-  'projects/create',
-  async (projectData, { dispatch }) => {
-    try {
-      dispatch(updateProjectStatus('loading'));
-      const result = await createNewProject(projectData);
-      dispatch(updateProjectStatus('succeeded'));
-      return result;
-    } catch (error) {
-      dispatch(updateProjectStatus('failed'));
-      throw error;
-    }
-  }
-);
 
 // Export actions
 export const { updateProject, updateProjectStatus, setCurrentProject, deleteProject } = projectsSlice.actions;
