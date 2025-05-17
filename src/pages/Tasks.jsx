@@ -1,288 +1,461 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { getIcon } from '../utils/iconUtils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { getIcon } from '../utils/iconUtils';
+import { fetchTasks, createTask, updateTask } from '../services/taskService';
+import { fetchProjects } from '../services/projectService';
 
 const Tasks = () => {
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', status: 'pending', priority: 'medium', dueDate: '' });
-  const [editingTask, setEditingTask] = useState(null);
-  
-  const SearchIcon = getIcon('Search');
-  const FilterIcon = getIcon('Filter');
+  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    description: '',
+    status: 'Not Started',
+    dueDate: '',
+    priority: 'Medium',
+    assignee: '',
+    projectId: ''
+  });
+  const [filterStatus, setFilterStatus] = useState('All');
+
+  // Get icons
+  const PlusIcon = getIcon('Plus');
+  const LoaderIcon = getIcon('Loader');
+  const CheckCircleIcon = getIcon('CheckCircle');
+  const ClockIcon = getIcon('Clock');
+  const AlertTriangleIcon = getIcon('AlertTriangle');
   const XIcon = getIcon('X');
-  const PlusIcon = getIcon('Plus'); 
-  
-  const tasks = [
-    { id: 1, title: "Design new landing page", priority: "high", status: "in progress", dueDate: "2023-08-25", assignee: "Alex S." },
-    { id: 2, title: "Fix payment integration", priority: "urgent", status: "pending", dueDate: "2023-08-22", assignee: "Taylor R." },
-    { id: 3, title: "Review marketing content", priority: "medium", status: "completed", dueDate: "2023-08-20", assignee: "Jamie L." },
-    { id: 4, title: "Setup analytics dashboard", priority: "low", status: "in progress", dueDate: "2023-08-30", assignee: "Morgan W." },
-    { id: 5, title: "User testing for v2.0", priority: "high", status: "pending", dueDate: "2023-08-28", assignee: "Casey P." },
-    { id: 6, title: "Database optimization", priority: "medium", status: "completed", dueDate: "2023-08-18", assignee: "Blake M." }
-  ];
-  const [tasksList, setTasksList] = useState(tasks);
-  
-  const handleSubmit = (e) => {
+  const CheckSquareIcon = getIcon('CheckSquare');
+  const FolderIcon = getIcon('Folder');
+  const UserIcon = getIcon('User');
+  const CalendarIcon = getIcon('Calendar');
+
+  // Load data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Load projects first
+        const projectData = await fetchProjects();
+        setProjects(projectData);
+        
+        // Then load tasks
+        const taskData = await fetchTasks();
+        setTasks(taskData);
+        
+      } catch (error) {
+        toast.error("Failed to load data: " + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setTaskForm({
+      ...taskForm,
+      [name]: value
+    });
+  };
+
+  // Open task modal for creation
+  const openNewTaskModal = () => {
+    setSelectedTask(null);
+    setTaskForm({
+      title: '',
+      description: '',
+      status: 'Not Started',
+      dueDate: '',
+      priority: 'Medium',
+      assignee: '',
+      projectId: ''
+    });
+    setIsTaskModalOpen(true);
+  };
+
+  // Open task modal for editing
+  const openEditTaskModal = (task) => {
+    setSelectedTask(task);
+    setTaskForm({
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      dueDate: task.dueDate?.split('T')[0] || '',
+      priority: task.priority,
+      assignee: task.assignee,
+      projectId: task.project || ''
+    });
+    setIsTaskModalOpen(true);
+  };
+
+  // Handle task creation/update
+  const handleTaskSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate required fields
-    if (!newTask.title.trim()) {
-      toast.error("Task title is required!");
-      return;
-    }
-
-    if (editingTask) {
-      // Update existing task
-      const updatedTasks = tasksList.map(task => 
-        task.id === editingTask.id ? { ...task, ...newTask } : task
-      );
-      setTasksList(updatedTasks);
-      toast.success("Task updated successfully!");
-    } else {
-      // Create a new task with all required properties
-      const newTaskWithId = {
-        id: Date.now(), // Generate unique ID
-        title: newTask.title,
-        description: newTask.description || "",
-        status: newTask.status || "pending",
-        priority: newTask.priority || "medium",
-        dueDate: newTask.dueDate || "",
-        assignee: "You"
-      };
-    
-      // Add the new task to the list
-      setTasksList([...tasksList, newTaskWithId]);
+    try {
+      if (selectedTask) {
+        // Update existing task
+        await updateTask(selectedTask.Id, taskForm);
+        toast.success("Task updated successfully");
+      } else {
+        // Create new task
+        await createTask(taskForm);
+        toast.success("Task created successfully");
+      }
       
-      // Show success message
-      toast.success("New task added successfully!");
-    }
-    
-    // Reset form and hide it
-    setNewTask({ title: '', description: '', status: 'pending', priority: 'medium', dueDate: '' });
-    setIsFormVisible(false);
-    setEditingTask(null);
-  };
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
-  };
-  
-  const handleEdit = (task) => {
-    setEditingTask(task);
-    setNewTask({ ...task });
-    setIsFormVisible(true);
-  };
-  
-  const handleCancel = () => {
-    setIsFormVisible(false);
-    setEditingTask(null);
-  };
-  
-  const filteredTasks = selectedStatus === 'all'
-    ? tasksList
-    : tasksList.filter(task => task.status === selectedStatus);
-  
-  const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'urgent': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-blue-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
-  };
-  
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'completed':
-        return <span className="px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium">Completed</span>;
-      case 'in progress':
-        return <span className="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium">In Progress</span>;
-      case 'pending':
-        return <span className="px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs font-medium">Pending</span>;
-      default:
-        return <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 text-xs font-medium">{status}</span>;
+      // Reload tasks
+      const updatedTasks = await fetchTasks();
+      setTasks(updatedTasks);
+      
+      // Close modal
+      setIsTaskModalOpen(false);
+    } catch (error) {
+      toast.error(selectedTask ? "Failed to update task" : "Failed to create task");
     }
   };
 
-return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-8 space-y-6"
-    >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+  // Handle status change for a task
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      const taskToUpdate = tasks.find(task => task.Id === taskId);
+      await updateTask(taskId, { ...taskToUpdate, status: newStatus });
+      
+      // Update local state
+      setTasks(tasks.map(task => 
+        task.Id === taskId ? { ...task, status: newStatus } : task
+      ));
+      
+      toast.success(`Task marked as ${newStatus}`);
+    } catch (error) {
+      toast.error("Failed to update task status");
+    }
+  };
+
+  // Filter tasks by status
+  const filteredTasks = filterStatus === 'All' 
+    ? tasks 
+    : tasks.filter(task => task.status === filterStatus);
+
+  // If loading, show spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <LoaderIcon className="animate-spin h-12 w-12 text-primary" />
+        <p className="ml-2 text-xl">Loading tasks...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Tasks</h1>
-        <button 
-          className="btn-primary flex items-center"
-          onClick={() => setIsFormVisible(true)}>
-          <PlusIcon size={18} className="mr-2" />
-          Add New Task
-        </button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex rounded-lg bg-white/30 dark:bg-surface-800/30 p-1 backdrop-blur-sm">
+            {['All', 'Not Started', 'In Progress', 'Completed'].map(status => (
+              <button
+                key={status}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  filterStatus === status
+                    ? 'bg-primary text-white'
+                    : 'hover:bg-white/20 dark:hover:bg-surface-700/30'
+                }`}
+                onClick={() => setFilterStatus(status)}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+          <button 
+            onClick={openNewTaskModal}
+            className="btn-primary flex items-center"
+          >
+            <PlusIcon size={18} className="mr-1.5" />
+            New Task
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative w-full sm:w-72">
-          <input 
-            type="text"
-            placeholder="Search tasks..."
-            className="input-field pl-10"
-          />
-          <SearchIcon size={18} className="absolute left-3.5 top-3 text-surface-400" />
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <button 
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedStatus === 'all' ? 'bg-primary text-white' : 'bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600'}`}
-            onClick={() => setSelectedStatus('all')}
-          >All</button>
-          <button 
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedStatus === 'pending' ? 'bg-primary text-white' : 'bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600'}`}
-            onClick={() => setSelectedStatus('pending')}
-          >Pending</button>
-          <button 
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedStatus === 'in progress' ? 'bg-primary text-white' : 'bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600'}`}
-            onClick={() => setSelectedStatus('in progress')}
-          >In Progress</button>
-          <button 
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedStatus === 'completed' ? 'bg-primary text-white' : 'bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600'}`}
-            onClick={() => setSelectedStatus('completed')}
-          >Completed</button>
-        </div>
+      {/* Tasks List */}
+      <div className="grid grid-cols-1 gap-4">
+        {filteredTasks.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-surface-500 dark:text-surface-400 mb-4">No tasks found</p>
+            <button 
+              onClick={openNewTaskModal}
+              className="btn-outline flex items-center mx-auto"
+            >
+              <PlusIcon size={18} className="mr-1.5" />
+              Create First Task
+            </button>
+          </div>
+        ) : (
+          filteredTasks.map(task => (
+            <motion.div
+              key={task.Id}
+              className="card-glass hover:shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex flex-col md:flex-row justify-between">
+                <div className="flex-1">
+                  <h3 
+                    className="text-xl font-bold mb-2 cursor-pointer hover:text-primary"
+                    onClick={() => openEditTaskModal(task)}
+                  >
+                    {task.title}
+                  </h3>
+                  <p className="text-surface-600 dark:text-surface-400 mb-4">{task.description}</p>
+                  
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="flex items-center text-sm bg-surface-200/50 dark:bg-surface-700/50 px-3 py-1 rounded-full">
+                      <FolderIcon size={14} className="mr-1.5 text-primary" />
+                      {projects.find(p => p.Id === task.project)?.Name || 'No Project'}
+                    </div>
+                    
+                    <div className="flex items-center text-sm bg-surface-200/50 dark:bg-surface-700/50 px-3 py-1 rounded-full">
+                      <UserIcon size={14} className="mr-1.5 text-tertiary" />
+                      {task.assignee || 'Unassigned'}
+                    </div>
+                    
+                    <div className="flex items-center text-sm bg-surface-200/50 dark:bg-surface-700/50 px-3 py-1 rounded-full">
+                      <CalendarIcon size={14} className="mr-1.5 text-secondary" />
+                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
+                    </div>
+                    
+                    <div className={`flex items-center text-sm px-3 py-1 rounded-full ${
+                      task.priority === 'High' 
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
+                        : task.priority === 'Medium'
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}>
+                      <AlertTriangleIcon size={14} className="mr-1.5" />
+                      {task.priority} Priority
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex md:flex-col gap-2 mt-4 md:mt-0 md:ml-4">
+                  <button 
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center ${
+                      task.status === 'Completed'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        : task.status === 'In Progress'
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                    }`}
+                  >
+                    {task.status === 'Completed' ? (
+                      <CheckCircleIcon size={14} className="mr-1.5" />
+                    ) : task.status === 'In Progress' ? (
+                      <ClockIcon size={14} className="mr-1.5" />
+                    ) : (
+                      <CheckSquareIcon size={14} className="mr-1.5" />
+                    )}
+                    {task.status}
+                  </button>
+                  
+                  {task.status !== 'Completed' && (
+                    <button
+                      onClick={() => handleStatusChange(task.Id, 'Completed')}
+                      className="px-3 py-1.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-lg text-sm font-medium flex items-center"
+                    >
+                      <CheckCircleIcon size={14} className="mr-1.5" />
+                      Mark Complete
+                    </button>
+                  )}
+                  
+                  {task.status === 'Not Started' && (
+                    <button
+                      onClick={() => handleStatusChange(task.Id, 'In Progress')}
+                      className="px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg text-sm font-medium flex items-center"
+                    >
+                      <ClockIcon size={14} className="mr-1.5" />
+                      Start Task
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
-      
-      <AnimatePresence>
-        {isFormVisible && (
-          <motion.div 
-            className="mb-6 mt-6"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <form onSubmit={handleSubmit} className="card-glass">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">{editingTask ? 'Edit Task' : 'New Task'}</h3>
+
+      {/* Task Modal */}
+      {isTaskModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsTaskModalOpen(false)}></div>
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <motion.div 
+              className="relative w-full max-w-2xl glass-card border border-white/30 dark:border-surface-700/30 shadow-float"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">
+                  {selectedTask ? 'Edit Task' : 'Create New Task'}
+                </h2>
                 <button 
-                  type="button" 
-                  onClick={handleCancel}
-                  className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
+                  className="p-1 rounded-full hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors" 
+                  onClick={() => setIsTaskModalOpen(false)}
                 >
                   <XIcon size={20} />
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Title</label>
+              <form onSubmit={handleTaskSubmit}>
+                <div className="mb-4">
+                  <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="title">
+                    Task Title
+                  </label>
                   <input
                     type="text"
+                    id="title"
                     name="title"
-                    value={newTask.title}
-                    onChange={handleChange}
+                    value={taskForm.title}
+                    onChange={handleInputChange}
                     className="input-field"
-                    placeholder="Task title"
+                    placeholder="Enter task title"
                     required
                   />
                 </div>
                 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Description</label>
+                <div className="mb-4">
+                  <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="description">
+                    Description
+                  </label>
                   <textarea
+                    id="description"
                     name="description"
-                    value={newTask.description}
-                    onChange={handleChange}
-                    className="input-field min-h-[100px]"
-                    placeholder="Task description"
+                    value={taskForm.description}
+                    onChange={handleInputChange}
+                    className="input-field"
+                    rows="3"
+                    placeholder="Enter task description"
                   ></textarea>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <select
-                    name="status"
-                    value={newTask.status}
-                    onChange={handleChange}
-                    className="input-field"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="in progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="projectId">
+                      Project
+                    </label>
+                    <select
+                      id="projectId"
+                      name="projectId"
+                      value={taskForm.projectId}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="">Select Project</option>
+                      {projects.map(project => (
+                        <option key={project.Id} value={project.Id}>{project.Name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="status">
+                      Status
+                    </label>
+                    <select
+                      id="status"
+                      name="status"
+                      value={taskForm.status}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="Not Started">Not Started</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Priority</label>
-                  <select
-                    name="priority"
-                    value={newTask.priority}
-                    onChange={handleChange}
-                    className="input-field"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="priority">
+                      Priority
+                    </label>
+                    <select
+                      id="priority"
+                      name="priority"
+                      value={taskForm.priority}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="assignee">
+                      Assignee
+                    </label>
+                    <select
+                      id="assignee"
+                      name="assignee"
+                      value={taskForm.assignee}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="">Select Assignee</option>
+                      {["Alex S.", "Jamie L.", "Taylor R.", "Morgan W.", "Casey P.", "Jordan B.", "Riley T.", "Blake M.", "Avery D."].map(member => (
+                        <option key={member} value={member}>{member}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Due Date</label>
+                
+                <div className="mb-6">
+                  <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="dueDate">
+                    Due Date
+                  </label>
                   <input
                     type="date"
+                    id="dueDate"
                     name="dueDate"
-                    value={newTask.dueDate || ''}
-                    onChange={handleChange}
+                    value={taskForm.dueDate}
+                    onChange={handleInputChange}
                     className="input-field"
                   />
                 </div>
-              </div>
-              
-              <div className="flex justify-end gap-3">
-                <button type="button" onClick={handleCancel} className="btn-outline">Cancel</button>
-                <button type="submit" className="btn-primary shadow-float">{editingTask ? 'Update Task' : 'Add Task'}</button>
-              </div>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-surface-100/70 dark:bg-surface-700/70 backdrop-blur-sm">
-              <th className="px-4 py-3 text-left text-sm font-semibold rounded-tl-xl">Task</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Priority</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Due Date</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Assignee</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold rounded-tr-xl">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
-            {filteredTasks.map(task => (
-              <motion.tr key={task.id} className="hover:bg-surface-50/50 dark:hover:bg-surface-800/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-                <td className="px-4 py-4 text-sm font-medium">{task.title}</td>
-                <td className="px-4 py-4">
-                  <div className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)}`}></div>
-                </td>
-                <td className="px-4 py-4">{getStatusBadge(task.status)}</td>
-                <td className="px-4 py-4 text-sm">{new Date(task.dueDate).toLocaleDateString()}</td>
-                <td className="px-4 py-4 text-sm">{task.assignee}</td>
-                <td className="px-4 py-4 text-right space-x-2">
-                  <button onClick={() => handleEdit(task)} className="px-2 py-1 text-xs rounded-md bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors">Edit</button>
-                  <button className="px-2 py-1 text-xs rounded-md bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/30 transition-colors">Delete</button>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </motion.div>
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    className="btn bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border border-surface-300 dark:border-surface-600 text-surface-800 dark:text-surface-200"
+                    onClick={() => setIsTaskModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                  >
+                    {selectedTask ? 'Update Task' : 'Create Task'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

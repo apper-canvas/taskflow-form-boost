@@ -1,21 +1,107 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { createContext, useEffect, useState } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser, clearUser } from './store/userSlice';
 import { ToastContainer } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { Provider } from 'react-redux';
-import { store } from './store';
 import Header from './components/Header';
-import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Callback from './pages/Callback';
+import ErrorPage from './pages/ErrorPage';
 import NotFound from './pages/NotFound';
 import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Calendar from './pages/Calendar';
 
+// Create auth context
+export const AuthContext = createContext(null);
+
 function App() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Get authentication status
+  const userState = useSelector((state) => state.user);
+  const isAuthenticated = userState?.isAuthenticated || false;
+
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem('darkMode') === 'true' || 
     window.matchMedia('(prefers-color-scheme: dark)').matches
   );
+
+  // Initialize ApperUI once when the app loads
+  useEffect(() => {
+    const { ApperClient, ApperUI } = window.ApperSDK;
+    const client = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+
+    // Initialize but don't show login yet
+    ApperUI.setup(client, {
+      target: '#authentication',
+      clientId: import.meta.env.VITE_APPER_PROJECT_ID,
+      view: 'both',
+      onSuccess: function (user) {
+        setIsInitialized(true);
+        // CRITICAL: This exact currentPath logic must be preserved in all implementations
+        // DO NOT simplify or modify this pattern as it ensures proper redirection flow
+        let currentPath = window.location.pathname + window.location.search;
+        let redirectPath = new URLSearchParams(window.location.search).get('redirect');
+        const isAuthPage = currentPath.includes('/login') || currentPath.includes('/signup') || currentPath.includes(
+            '/callback') || currentPath.includes('/error');
+        if (user) {
+          // User is authenticated
+          if (redirectPath) {
+            navigate(redirectPath);
+          } else if (!isAuthPage) {
+            if (!currentPath.includes('/login') && !currentPath.includes('/signup')) {
+              navigate(currentPath);
+            } else {
+              navigate('/');
+            }
+          } else {
+            navigate('/');
+          }
+          // Store user information in Redux
+          dispatch(setUser(JSON.parse(JSON.stringify(user))));
+        } else {
+          // User is not authenticated
+          if (!isAuthPage) {
+            navigate(
+              currentPath.includes('/signup')
+               ? `/signup?redirect=${currentPath}`
+               : currentPath.includes('/login')
+               ? `/login?redirect=${currentPath}`
+               : '/login');
+          } else if (redirectPath) {
+            if (
+              ![
+                'error',
+                'signup',
+                'login',
+                'callback'
+              ].some((path) => currentPath.includes(path)))
+              navigate(`/login?redirect=${redirectPath}`);
+            else {
+              navigate(currentPath);
+            }
+          } else if (isAuthPage) {
+            navigate(currentPath);
+          } else {
+            navigate('/login');
+          }
+          dispatch(clearUser());
+        }
+      },
+      onError: function(error) {
+        console.error("Authentication failed:", error);
+        setIsInitialized(true);
+      }
+    });
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     if (darkMode) {
@@ -30,8 +116,29 @@ function App() {
     setDarkMode(!darkMode);
   };
 
+  // Authentication methods to share via context
+  const authMethods = {
+    isInitialized,
+    isAuthenticated,
+    logout: async () => {
+      try {
+        const { ApperUI } = window.ApperSDK;
+        await ApperUI.logout();
+        dispatch(clearUser());
+        navigate('/login');
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    }
+  };
+
+  // Don't render routes until initialization is complete
+  if (!isInitialized) {
+    return <div className="loading">Initializing application...</div>;
+  }
+
   return (
-    <Provider store={store}>
+    <AuthContext.Provider value={authMethods}>
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 -z-10 bg-gradient-to-br from-primary/5 via-surface-50 to-tertiary/5 dark:from-primary/10 dark:via-surface-900 dark:to-tertiary/10"></div>
         <div className="fixed -z-10 top-0 left-0 right-0 h-72 bg-gradient-to-r from-primary/8 via-tertiary/8 to-secondary/8 dark:from-primary/15 dark:via-tertiary/15 dark:to-secondary/15 blur-[120px]"></div>
@@ -70,11 +177,14 @@ function App() {
         </motion.div>
 
         {/* Header with navigation */}
-        <Header />
+        {isAuthenticated && <Header />}
         
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/callback" element={<Callback />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="/" element={isAuthenticated ? <Dashboard /> : <Login />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -97,7 +207,7 @@ function App() {
           }
         />
       </div>
-    </Provider>
+    </AuthContext.Provider>
   );
 }
 

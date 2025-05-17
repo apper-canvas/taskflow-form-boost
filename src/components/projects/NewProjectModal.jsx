@@ -21,16 +21,22 @@ const NewProjectModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen, dispatch, status]);
 
-  const handleSubmit = (projectData) => {
-    dispatch(createProject(projectData));
-    
-    // Show success toast and close modal after a delay
-    // In a real app with API, this would be in the fulfilled case of createAsyncThunk
-    setTimeout(() => {
+  const handleSubmit = async (projectData) => {
+    try {
+      // createProject is now a thunk that makes an API call
+      await dispatch(createProject(projectData)).unwrap();
+      
+      // Show success message
       toast.success(`Project "${projectData.name}" created successfully!`);
+      
+      // Close modal and reset status
       dispatch(updateProjectStatus('idle'));
       onClose();
-    }, 600);
+    } catch (error) {
+      // Handle error
+      toast.error(`Failed to create project: ${error.message}`);
+      dispatch(updateProjectStatus('failed'));
+    }
   };
 
   const modalVariants = {

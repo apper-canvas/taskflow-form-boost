@@ -1,44 +1,16 @@
-import { createSlice, nanoid, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchProjects, createNewProject, deleteProject as deleteProjectService } from '../../services/projectService';
 
-// Initial sample projects data
 const initialState = {
-  projects: [
-    { 
-      id: '1', 
-      name: "Website Redesign", 
-      description: "Complete overhaul of company website with modern design", 
-      progress: 75, 
-      tasks: 24, 
-      completedTasks: 18,
-      dueDate: "2023-07-15", 
-      team: ["Alex S.", "Jamie L.", "Taylor R."],
-      createdAt: "2023-05-01"
-    },
-    { 
-      id: '2', 
-      name: "Mobile App Development", 
-      description: "Create iOS and Android versions of customer portal", 
-      progress: 45, 
-      tasks: 32, 
-      completedTasks: 14,
-      dueDate: "2023-09-30", 
-      team: ["Morgan W.", "Casey P.", "Jordan B.", "Riley T."],
-      createdAt: "2023-06-15"
-    },
-    { 
-      id: '3', 
-      name: "Product Launch Campaign", 
-      description: "Plan and execute marketing campaign for new product", 
-      progress: 30, 
-      tasks: 18, 
-      completedTasks: 5,
-      dueDate: "2023-08-10", 
-      team: ["Blake M.", "Avery D."],
-      createdAt: "2023-07-01"
-    }
-  ],
+  projects: [],
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null
+  error: null,
+  currentProject: null
+};
+
+// Async thunk to fetch projects
+export const fetchAllProjects = createAsyncThunk('projects/fetchAll', async () => {
+  return await fetchProjects();
 };
 
 export const projectsSlice = createSlice({
@@ -46,26 +18,6 @@ export const projectsSlice = createSlice({
   initialState,
   reducers: {
     // Add a new project
-    createProject: {
-      reducer(state, action) {        
-        // Directly add the project to state - no async operations in reducers
-        state.projects.push(action.payload);
-      },
-      prepare(projectData) {
-        // Generate an ID and add creation date
-        const today = new Date().toISOString().split('T')[0];
-        return {
-          payload: {
-            id: nanoid(),
-            ...projectData,
-            progress: 0,
-            tasks: 0,
-            completedTasks: 0,
-            createdAt: today
-          }
-        };
-      }
-    },
     // Update project loading state
     updateProjectStatus(state, action) {
       state.status = action.payload;
@@ -81,34 +33,64 @@ export const projectsSlice = createSlice({
       if (existingProject) {
         Object.assign(existingProject, changes);
       }
+    },
+    setCurrentProject(state, action) {
+      state.currentProject = action.payload;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch projects
+      .addCase(fetchAllProjects.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchAllProjects.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.projects = action.payload.map(project => ({
+          id: project.Id,
+          name: project.Name,
+          description: project.description,
+          progress: project.progress || 0,
+          tasks: project.tasks || 0,
+          completedTasks: project.completedTasks || 0,
+          dueDate: project.dueDate,
+          team: project.team || [],
+          createdAt: project.CreatedOn
+        }));
+      })
+      .addCase(fetchAllProjects.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      });
   }
 });
 
-// Export actions and reducer
-export const { createProject, deleteProject, updateProject, updateProjectStatus } = projectsSlice.actions;
-
-// Thunk to simulate loading when creating a project
-export const simulateLoading = createAsyncThunk(
-  'projects/simulateLoading',
+// Async thunk to create a project
+export const createProject = createAsyncThunk(
+  'projects/create',
   async (projectData, { dispatch }) => {
-    // Set loading state
-    dispatch(updateProjectStatus('loading'));
-    
-    // Create the project
-    dispatch(createProject(projectData));
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Set success state
-    dispatch(updateProjectStatus('succeeded'));
+    try {
+      dispatch(updateProjectStatus('loading'));
+      const result = await createNewProject(projectData);
+      dispatch(updateProjectStatus('succeeded'));
+      return result;
+    } catch (error) {
+      dispatch(updateProjectStatus('failed'));
+      throw error;
+    }
   }
 );
 
-// Export selectors
-export const selectAllProjects = state => state.projects.projects;
-export const selectProjectStatus = state => state.projects.status;
+// Export actions
+export const { 
+  updateProject, 
+  updateProjectStatus,
+  setCurrentProject,
+  deleteProject
+  }
+);
 
-// Export the reducer as default for use in the store
+export const selectAllProjects = state => state.projects.projects || [];
+export const selectAllProjects = state => state.projects.projects;
+export const selectCurrentProject = state => state.projects.currentProject;
 export default projectsSlice.reducer;
