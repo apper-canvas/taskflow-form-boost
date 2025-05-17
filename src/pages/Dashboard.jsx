@@ -99,7 +99,7 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+      <motion.div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex space-x-3">
           <button 
@@ -109,21 +109,16 @@ const Dashboard = () => {
             <PlusIcon size={18} className="mr-1.5" />
             New Project
           </button>
-      </motion.div>
-      
-      {/* New Project Modal */}
-      <NewProjectModal 
-        isOpen={isNewProjectModalOpen} 
-        onClose={() => setIsNewProjectModalOpen(false)} 
-      />
-    </div>
           <button 
             onClick={handleExport}
             className="btn-outline flex items-center"
           >
             <DownloadIcon size={18} className="mr-1.5" />
             Export
+          </button>
+        </div>
       </motion.div>
+      
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
