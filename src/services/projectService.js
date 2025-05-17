@@ -132,3 +132,42 @@ export const deleteProject = async (projectId) => {
     throw error;
   }
 };
+
+/**
+ * Update an existing project in the database
+ */
+export const updateProject = async (projectData) => {
+  try {
+    const { ApperClient } = window.ApperSDK;
+    const apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+
+    // Map fields to database schema
+    const mappedProject = {
+      Id: projectData.id,
+      Name: projectData.name,
+      description: projectData.description,
+      progress: projectData.progress || 0,
+      tasks: projectData.tasks || 0,
+      completedTasks: projectData.completedTasks || 0,
+      dueDate: projectData.dueDate,
+      team: projectData.team
+    };
+
+    const filteredProject = getUpdateableFields(mappedProject);
+    // Add back the Id field which is needed for updates
+    filteredProject.Id = projectData.id;
+    
+    const response = await apperClient.updateRecord('project1', {
+      records: [filteredProject]
+    });
+
+    return response && response.success && response.results && response.results.length > 0 
+      ? response.results[0].data : null;
+  } catch (error) {
+    console.error(`Error updating project with ID ${projectData.id}:`, error);
+    throw error;
+  }
+};
