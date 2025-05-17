@@ -14,15 +14,15 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div className="glass-effect border-b border-white/20 dark:border-surface-700/20">
-        <div className="container mx-auto px-4 py-3">
+    <header className="sticky top-0 z-50 w-full shadow-sm">
+      <div className="glass-effect border-b border-white/30 dark:border-surface-700/30">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-md bg-gradient-animate flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-9 h-9 rounded-lg bg-gradient-animate flex items-center justify-center text-white font-bold text-lg shadow-sm">
                 TF
-              </div>
+              </div> 
               <span className="text-xl font-bold gradient-text">TaskFlow</span>
             </div>
 
@@ -32,10 +32,10 @@ const Header = () => {
                 to="/" 
                 end
                 className={({ isActive }) => 
-                  `px-4 py-2 rounded-xl transition-all duration-300 ${
+                  `px-5 py-2.5 rounded-xl transition-all duration-300 text-base ${
                     isActive 
-                      ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium' 
-                      : 'hover:bg-white/20 dark:hover:bg-surface-700/20'
+                      ? 'nav-link-active' 
+                      : 'hover:bg-white/30 dark:hover:bg-surface-700/30'
                   }`
                 }
               >
@@ -44,10 +44,10 @@ const Header = () => {
               <NavLink 
                 to="/tasks" 
                 className={({ isActive }) => 
-                  `px-4 py-2 rounded-xl transition-all duration-300 ${
+                  `px-5 py-2.5 rounded-xl transition-all duration-300 text-base ${
                     isActive 
-                      ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium' 
-                      : 'hover:bg-white/20 dark:hover:bg-surface-700/20'
+                      ? 'nav-link-active' 
+                      : 'hover:bg-white/30 dark:hover:bg-surface-700/30'
                   }`
                 }
               >
@@ -56,10 +56,10 @@ const Header = () => {
               <NavLink 
                 to="/calendar" 
                 className={({ isActive }) => 
-                  `px-4 py-2 rounded-xl transition-all duration-300 ${
+                  `px-5 py-2.5 rounded-xl transition-all duration-300 text-base ${
                     isActive 
-                      ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium' 
-                      : 'hover:bg-white/20 dark:hover:bg-surface-700/20'
+                      ? 'nav-link-active' 
+                      : 'hover:bg-white/30 dark:hover:bg-surface-700/30'
                   }`
                 }
               >
@@ -69,7 +69,7 @@ const Header = () => {
 
             {/* Mobile menu button */}
             <button 
-              className="md:hidden p-2 rounded-lg hover:bg-white/20 dark:hover:bg-surface-700/20 transition-colors"
+              className="md:hidden p-2.5 rounded-lg glass-button hover:bg-white/30 dark:hover:bg-surface-700/30 transition-colors"
               onClick={toggleMenu}
               aria-label="Toggle menu"
             >
@@ -83,6 +83,34 @@ const Header = () => {
             </button>
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-t border-white/20 dark:border-surface-700/20"
+          >
+            <nav className="flex flex-col space-y-2 p-4">
+              <NavLink 
+                to="/" 
+                onClick={closeMenu}
+                className={({ isActive }) => `px-4 py-3 rounded-xl ${isActive ? 'nav-link-active' : 'hover:bg-white/30 dark:hover:bg-surface-700/30'}`}
+              >Dashboard</NavLink>
+              <NavLink 
+                to="/tasks" 
+                onClick={closeMenu}
+                className={({ isActive }) => `px-4 py-3 rounded-xl ${isActive ? 'nav-link-active' : 'hover:bg-white/30 dark:hover:bg-surface-700/30'}`}
+              >Tasks</NavLink>
+              <NavLink 
+                to="/calendar" 
+                onClick={closeMenu}
+                className={({ isActive }) => `px-4 py-3 rounded-xl ${isActive ? 'nav-link-active' : 'hover:bg-white/30 dark:hover:bg-surface-700/30'}`}
+              >Calendar</NavLink>
+            </nav>
+          </motion.div>
+        )}
       </div>
     </header>
   );

@@ -7,7 +7,7 @@
 
 @layer base {
   body {
-    @apply font-sans text-surface-800 dark:text-surface-100 bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800 min-h-screen transition-colors duration-300 bg-fixed;
+    @apply font-sans text-surface-800 dark:text-surface-100 bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800 min-h-screen transition-colors duration-300 bg-fixed antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -15,15 +15,15 @@
   }
 
   h1 {
-    @apply text-3xl md:text-4xl lg:text-5xl;
+    @apply text-3xl md:text-4xl lg:text-5xl tracking-tight;
   }
 
   h2 {
-    @apply text-2xl md:text-3xl lg:text-4xl;
+    @apply text-2xl md:text-3xl lg:text-4xl tracking-tight;
   }
 
   h3 {
-    @apply text-xl md:text-2xl lg:text-3xl;
+    @apply text-xl md:text-2xl lg:text-3xl tracking-tight;
   }
 
   h4 {
@@ -33,15 +33,15 @@
 
 @layer components {
   .btn {
-    @apply px-4 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none hover:shadow-float focus:ring-2 focus:ring-offset-2;
+    @apply px-4 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none hover:shadow-float focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:pointer-events-none;
   }
 
   .btn-primary {
-    @apply btn bg-gradient-to-r from-primary to-primary-dark text-white hover:from-primary-dark hover:to-primary focus:ring-primary/50;
+    @apply btn bg-gradient-to-r from-primary to-primary-dark text-white hover:from-primary-dark hover:to-primary focus:ring-primary/50 shadow-sm;
   }
 
   .btn-secondary {
-    @apply btn bg-gradient-to-r from-secondary to-secondary-dark text-white hover:from-secondary-dark hover:to-secondary focus:ring-secondary/50;
+    @apply btn bg-gradient-to-r from-secondary to-secondary-dark text-white hover:from-secondary-dark hover:to-secondary focus:ring-secondary/50 shadow-sm;
   }
   
   .btn-tertiary {
@@ -49,15 +49,15 @@
   }
 
   .btn-outline {
-    @apply btn bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border-2 border-primary text-primary hover:bg-primary/10 focus:ring-primary/20;
+    @apply btn bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border border-primary text-primary hover:bg-primary/10 focus:ring-primary/20 shadow-sm;
   }
 
   .card {
-    @apply bg-white/90 dark:bg-surface-800/90 backdrop-blur-sm rounded-2xl shadow-float dark:shadow-card p-6 transition-all duration-300 border border-white/50 dark:border-surface-700/50;
+    @apply bg-white/95 dark:bg-surface-800/95 backdrop-blur-sm rounded-2xl shadow-float dark:shadow-card p-6 transition-all duration-300 border border-white/50 dark:border-surface-700/50;
   }
 
   .card-neu {
-    @apply bg-surface-100/90 dark:bg-surface-800/90 backdrop-blur-sm rounded-2xl shadow-neu-light dark:shadow-neu-dark p-6 transition-all duration-300;
+    @apply bg-surface-100/95 dark:bg-surface-800/95 backdrop-blur-sm rounded-2xl shadow-neu-light dark:shadow-neu-dark p-6 transition-all duration-300;
   }
   
   .card-glass {
@@ -73,7 +73,7 @@
   }
 
   .input-field {
-    @apply w-full px-4 py-2.5 bg-white/70 dark:bg-surface-700/70 backdrop-blur-sm border border-surface-300/70 dark:border-surface-600/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 focus:shadow-inner-glow;
+    @apply w-full px-4 py-2.5 bg-white/80 dark:bg-surface-700/80 backdrop-blur-sm border border-surface-300/70 dark:border-surface-600/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 focus:shadow-inner-glow;
   }
 }
 
@@ -87,15 +87,15 @@
   }
   
   .bg-glass {
-    @apply bg-white/40 dark:bg-surface-800/40 backdrop-blur-md;
+    @apply bg-white/50 dark:bg-surface-800/50 backdrop-blur-md;
   }
   
   .glass-effect {
-    @apply bg-white/30 dark:bg-surface-800/30 backdrop-blur-md border border-white/20 dark:border-surface-700/20 shadow-glass;
+    @apply bg-white/40 dark:bg-surface-800/40 backdrop-blur-md border border-white/20 dark:border-surface-700/20 shadow-glass;
   }
   
   .glass-card {
-    @apply glass-effect rounded-2xl p-6;
+    @apply glass-effect rounded-2xl p-6 hover:bg-white/45 dark:hover:bg-surface-800/45 transition-colors duration-300;
   }
   
   .glass-button {
@@ -103,7 +103,7 @@
   }
   
   .nav-link-active {
-    @apply bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium;
+    @apply bg-primary/15 dark:bg-primary/25 text-primary-dark dark:text-primary-light font-medium shadow-sm;
   }
   
   .floating {
@@ -120,6 +120,14 @@
   
   .bg-300 {
     background-size: 300% 300%;
+  }
+  
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 }
 

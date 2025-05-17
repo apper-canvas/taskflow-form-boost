@@ -46,12 +46,14 @@ export default {
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
-        'float': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.12)',
+        'float': '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
         'glow': '0 0 15px rgba(59, 130, 246, 0.5)',
         'inner-glow': 'inset 0 0 15px rgba(59, 130, 246, 0.15)',
         'neu-light': '5px 5px 15px #d1d9e6, -5px -5px 15px #ffffff',
-        'neu-dark': '5px 5px 15px rgba(0, 0, 0, 0.3), -5px -5px 15px rgba(255, 255, 255, 0.05)'
+        'neu-dark': '5px 5px 15px rgba(0, 0, 0, 0.3), -5px -5px 15px rgba(255, 255, 255, 0.05)',
+        'button': '0 1px 2px rgba(0, 0, 0, 0.05)',
+        'raised': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)'
       },
       borderRadius: {
         'xl': '0.75rem',
@@ -66,7 +68,9 @@ export default {
         'gradient': 'gradient 15s ease infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'spin-slow': 'spin 5s linear infinite',
-        'bounce-subtle': 'bounce-subtle 3s ease-in-out infinite'
+        'bounce-subtle': 'bounce-subtle 3s ease-in-out infinite',
+        'wiggle': 'wiggle 1s ease-in-out infinite',
+        'scale': 'scale 1s ease-in-out infinite'
       }
     }
   },
