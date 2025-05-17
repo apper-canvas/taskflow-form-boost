@@ -61,9 +61,9 @@ const Tasks = () => {
   
   const handleCancel = () => setIsFormVisible(false);
   
-  const filteredTasks = selectedStatus === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.status === selectedStatus);
+  const filteredTasks = selectedStatus === 'all'
+    ? tasksList
+    : tasksList.filter(task => task.status === selectedStatus);
   
   const getPriorityColor = (priority) => {
     switch(priority) {
@@ -244,7 +244,7 @@ return (
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
-            {filteredTasks.map((task) => (
+            {filteredTasks.map(task => (
               <motion.tr key={task.id} className="hover:bg-surface-50/50 dark:hover:bg-surface-800/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 <td className="px-4 py-4 text-sm font-medium">{task.title}</td>
                 <td className="px-4 py-4">
