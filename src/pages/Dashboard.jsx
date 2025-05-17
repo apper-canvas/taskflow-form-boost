@@ -135,7 +135,8 @@ const Dashboard = () => {
               <p className="text-surface-600 dark:text-surface-300">Team Members</p>
               <span className="flex items-center text-sm text-secondary">
                 <ArrowUpIcon size={14} className="mr-1" /> Active
-        </motion.div>
+              </span>
+            </div>
 
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -225,8 +226,7 @@ const Dashboard = () => {
             ))
           )}
         </div>
-          </motion.div>
-        ))}
+      </div>
       </div>
       
       {/* New Project Modal */}
