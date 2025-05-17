@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 import NewProjectModal from '../components/projects/NewProjectModal';
 import { selectAllProjects, fetchAllProjects } from '../features/projects/projectsSlice';
+import MainFeature from '../components/MainFeature';
 
 const Dashboard = () => {
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
@@ -82,6 +83,9 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Main Feature */}
+      <MainFeature onNewProject={() => setIsNewProjectModalOpen(true)} />
+      
       <motion.div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex space-x-3">
@@ -104,10 +108,10 @@ const Dashboard = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <motion.div 
+            className="card-glass hover:shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="card-glass hover:shadow-lg"
         >
             <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center text-primary mb-4">
               <FolderIcon size={24} />
@@ -122,9 +126,9 @@ const Dashboard = () => {
         </motion.div>
 
         <motion.div 
+            className="card-glass hover:shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
             className="card-glass hover:shadow-lg"
         >
             <div className="w-12 h-12 rounded-xl bg-tertiary/15 flex items-center justify-center text-tertiary mb-4">
@@ -140,9 +144,9 @@ const Dashboard = () => {
         </motion.div>
 
         <motion.div 
+            className="card-glass hover:shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
             className="card-glass hover:shadow-lg"
         >
             <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center text-secondary mb-4">
@@ -155,9 +159,9 @@ const Dashboard = () => {
         </motion.div>
 
         <motion.div 
+            className="card-glass hover:shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
             className="card-glass hover:shadow-lg"
         >
             <div className="w-12 h-12 rounded-xl bg-accent/15 flex items-center justify-center text-accent mb-4">
