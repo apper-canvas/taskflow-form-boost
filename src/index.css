@@ -7,7 +7,7 @@
 
 @layer base {
   body {
-    @apply font-sans text-surface-800 dark:text-surface-100 bg-surface-50 dark:bg-surface-900 min-h-screen transition-colors duration-300;
+    @apply font-sans text-surface-800 dark:text-surface-100 bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-800 min-h-screen transition-colors duration-300 bg-fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -33,31 +33,47 @@
 
 @layer components {
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none;
+    @apply px-4 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none hover:shadow-float focus:ring-2 focus:ring-offset-2;
   }
 
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-primary/50;
+    @apply btn bg-gradient-to-r from-primary to-primary-dark text-white hover:from-primary-dark hover:to-primary focus:ring-primary/50;
   }
 
   .btn-secondary {
-    @apply btn bg-secondary text-white hover:bg-secondary-dark focus:ring-2 focus:ring-secondary/50;
+    @apply btn bg-gradient-to-r from-secondary to-secondary-dark text-white hover:from-secondary-dark hover:to-secondary focus:ring-secondary/50;
+  }
+  
+  .btn-tertiary {
+    @apply btn bg-gradient-to-r from-tertiary to-tertiary-dark text-white hover:from-tertiary-dark hover:to-tertiary focus:ring-tertiary/50;
   }
 
   .btn-outline {
-    @apply btn border-2 border-primary text-primary hover:bg-primary/10 focus:ring-2 focus:ring-primary/20;
+    @apply btn bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border-2 border-primary text-primary hover:bg-primary/10 focus:ring-primary/20;
   }
 
   .card {
-    @apply bg-white dark:bg-surface-800 rounded-2xl shadow-card dark:shadow-none p-6 transition-all duration-300;
+    @apply bg-white/90 dark:bg-surface-800/90 backdrop-blur-sm rounded-2xl shadow-float dark:shadow-card p-6 transition-all duration-300 border border-white/50 dark:border-surface-700/50;
   }
 
   .card-neu {
-    @apply bg-surface-100 dark:bg-surface-800 rounded-2xl shadow-neu-light dark:shadow-neu-dark p-6 transition-all duration-300;
+    @apply bg-surface-100/90 dark:bg-surface-800/90 backdrop-blur-sm rounded-2xl shadow-neu-light dark:shadow-neu-dark p-6 transition-all duration-300;
+  }
+  
+  .card-glass {
+    @apply bg-white/40 dark:bg-surface-800/40 backdrop-blur-md rounded-2xl shadow-glass p-6 transition-all duration-300 border border-white/30 dark:border-surface-700/30;
+  }
+  
+  .card-floating {
+    @apply card animate-float hover:shadow-lg;
+  }
+  
+  .gradient-border {
+    @apply relative rounded-xl p-[2px] bg-gradient-to-r from-primary via-tertiary to-secondary;
   }
 
   .input-field {
-    @apply w-full px-4 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300;
+    @apply w-full px-4 py-2.5 bg-white/70 dark:bg-surface-700/70 backdrop-blur-sm border border-surface-300/70 dark:border-surface-600/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 focus:shadow-inner-glow;
   }
 }
 
@@ -69,4 +85,74 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  .bg-glass {
+    @apply bg-white/40 dark:bg-surface-800/40 backdrop-blur-md;
+  }
+  
+  .glass-effect {
+    @apply bg-white/30 dark:bg-surface-800/30 backdrop-blur-md border border-white/20 dark:border-surface-700/20 shadow-glass;
+  }
+  
+  .glass-card {
+    @apply glass-effect rounded-2xl p-6;
+  }
+  
+  .glass-button {
+    @apply glass-effect rounded-xl px-4 py-2 hover:bg-white/40 dark:hover:bg-surface-700/40 transition-all duration-300;
+  }
+  
+  .floating {
+    @apply animate-float;
+  }
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-tertiary to-secondary animate-gradient bg-300;
+  }
+  
+  .bg-gradient-animate {
+    @apply bg-gradient-to-r from-primary via-tertiary to-secondary animate-gradient bg-300;
+  }
+  
+  .bg-300 {
+    background-size: 300% 300%;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }

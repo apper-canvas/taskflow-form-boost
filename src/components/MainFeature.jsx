@@ -167,7 +167,7 @@ const MainFeature = ({ project }) => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="bg-surface-100 dark:bg-surface-800 p-8 rounded-2xl max-w-md shadow-neu-light dark:shadow-neu-dark">
+        <div className="glass-card max-w-md animate-float">
           <div className="text-primary mb-4">
             <ClipboardListIcon size={48} />
           </div>
@@ -175,8 +175,8 @@ const MainFeature = ({ project }) => {
           <p className="text-surface-600 dark:text-surface-300 mb-6">
             Select a project from the list to view and manage its tasks, or create a new project to get started.
           </p>
-          <div className="py-2 px-4 bg-primary/10 dark:bg-primary/20 rounded-lg text-primary font-medium inline-flex items-center">
-            <ArrowLeftIcon size={18} className="mr-2" />
+          <div className="py-2 px-4 glass-button text-primary font-medium inline-flex items-center animate-bounce-subtle">
+            <ArrowLeftIcon size={18} className="mr-2 animate-pulse-subtle" />
             Select a project
           </div>
         </div>
@@ -198,12 +198,12 @@ const MainFeature = ({ project }) => {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-surface-100 dark:bg-surface-800 rounded-lg overflow-hidden p-1">
-            <button 
-              className={`p-2 rounded ${kanbanView ? 'bg-primary text-white' : 'text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'}`}
+            <button
+              className={`p-2 rounded-lg ${kanbanView ? 'bg-gradient-to-br from-primary to-primary-dark text-white shadow-float' : 'text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'}`}
               onClick={() => setKanbanView(true)}
               aria-label="Kanban view"
             >
-              <KanbanIcon size={18} />
+              <KanbanIcon size={20} />
             </button>
             <button 
               className={`p-2 rounded ${!kanbanView ? 'bg-primary text-white' : 'text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'}`}
@@ -236,7 +236,7 @@ const MainFeature = ({ project }) => {
             exit="hidden"
             variants={fadeIn}
           >
-            <form onSubmit={handleSubmit} className="card bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+            <form onSubmit={handleSubmit} className="card-glass">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold">{editingTask ? 'Edit Task' : 'New Task'}</h3>
                 <button 
@@ -323,7 +323,7 @@ const MainFeature = ({ project }) => {
                 </button>
                 <button 
                   type="submit" 
-                  className="btn-primary"
+                  className="btn-primary shadow-float"
                 >
                   {editingTask ? 'Update Task' : 'Add Task'}
                 </button>
@@ -336,13 +336,13 @@ const MainFeature = ({ project }) => {
       {kanbanView ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {kanbanColumns.map(column => (
-            <div key={column.id} className="bg-surface-100/50 dark:bg-surface-800/50 rounded-xl p-4">
+            <div key={column.id} className="glass-effect rounded-xl p-4">
               <h3 className="font-semibold mb-3 flex items-center">
                 {column.name}
-                <span className="ml-2 bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 text-xs rounded-full px-2 py-0.5">
+                <span className="ml-2 glass-effect rounded-full px-2 py-0.5 text-xs">
                   {tasksByStatus[column.id]?.length || 0}
                 </span>
-              </h3>
+              </h3> 
               <div className="space-y-3">
                 <AnimatePresence>
                   {tasksByStatus[column.id]?.length ? (
@@ -354,11 +354,11 @@ const MainFeature = ({ project }) => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="card bg-white dark:bg-surface-800 shadow-sm hover:shadow-md transition-all duration-300 border border-surface-200 dark:border-surface-700"
+                        className="glass-card hover:shadow-float transition-all duration-300"
                       >
                         <div className="mb-2 flex justify-between items-start">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getPriorityColor(task.priority)}`}>
-                            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} 
                           </span>
                           <div className="flex gap-1">
                             <button 
@@ -396,7 +396,7 @@ const MainFeature = ({ project }) => {
                       <div className="mb-2 opacity-70">
                         {column.id === 'todo' ? <ClipboardListIcon size={24} /> : 
                          column.id === 'inprogress' ? <ClockIcon size={24} /> :
-                         <CheckCircleIcon size={24} />}
+                         <CheckCircleIcon size={24} />} 
                       </div>
                       <p className="text-sm">No tasks here</p>
                     </motion.div>
@@ -407,7 +407,7 @@ const MainFeature = ({ project }) => {
           ))}
         </div>
       ) : (
-        <div className="card bg-white dark:bg-surface-800 overflow-hidden">
+        <div className="card-glass overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-full divide-y divide-surface-200 dark:divide-surface-700">
               <thead className="bg-surface-100/70 dark:bg-surface-700/70">

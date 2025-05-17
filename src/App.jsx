@@ -25,16 +25,21 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-primary/5 to-tertiary/5 dark:from-primary/10 dark:to-tertiary/10"></div>
+      <div className="fixed -z-10 top-0 left-0 right-0 h-64 bg-gradient-to-r from-primary/10 via-tertiary/10 to-secondary/10 dark:from-primary/20 dark:via-tertiary/20 dark:to-secondary/20 blur-3xl"></div>
+      <div className="fixed -z-10 bottom-0 left-0 right-0 h-64 bg-gradient-to-r from-secondary/10 via-primary/10 to-tertiary/10 dark:from-secondary/20 dark:via-primary/20 dark:to-tertiary/20 blur-3xl"></div>
+      
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-6 right-6 z-50 floating"
       >
         <button
           onClick={toggleDarkMode}
-          className="p-3 rounded-full bg-surface-200 dark:bg-surface-700 shadow-soft hover:shadow-lg transition-all duration-300"
+          className="p-3.5 rounded-full glass-effect hover:shadow-glow transition-all duration-300 border border-white/40 dark:border-surface-600/40 hover:scale-105"
+          whileHover={{ scale: 1.05 }}
           aria-label="Toggle dark mode"
         >
           {darkMode ? (
@@ -73,7 +78,11 @@ function App() {
         draggable
         pauseOnHover
         theme={darkMode ? "dark" : "light"}
-        toastClassName="rounded-xl font-medium"
+        toastClassName={() => 
+          "relative flex p-4 min-h-10 rounded-xl justify-between overflow-hidden cursor-pointer " + 
+          "bg-white/80 dark:bg-surface-800/80 backdrop-blur-md font-medium border border-white/50 dark:border-surface-700/50 " + 
+          "shadow-float"
+        }
       />
     </div>
   );
