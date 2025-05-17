@@ -149,3 +149,5 @@ const Dashboard = () => {
         onClose={() => setIsNewProjectModalOpen(false)} 
       />
     </div>
+  );
+}
