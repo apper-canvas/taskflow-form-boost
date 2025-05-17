@@ -75,6 +75,27 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Hero Welcome Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-tertiary/90 dark:from-primary-dark/90 dark:to-tertiary-dark/90 mix-blend-multiply z-10"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center"></div>
+        <div className="relative z-20 container mx-auto px-4 py-20 md:py-32 flex flex-col items-center text-center">
+          <motion.h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            Welcome to <span className="gradient-text font-extrabold">TaskFlow</span>
+          </motion.h1>
+          <motion.p 
+            className="text-lg md:text-xl text-white/90 max-w-3xl mb-8 drop-shadow"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+          >Your complete solution for project management, team collaboration, and task tracking - all in one beautiful interface.</motion.p>
+        </div>
+      </section>
       <header className="bg-gradient-to-r from-primary to-primary-dark text-white py-4 px-4 md:px-8 shadow-md">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
           <div className="flex items-center mb-4 sm:mb-0">
