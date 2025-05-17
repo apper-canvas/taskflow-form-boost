@@ -87,10 +87,8 @@ export const {
   updateProjectStatus,
   setCurrentProject,
   deleteProject
-  }
-);
+};
 
 export const selectAllProjects = state => state.projects.projects || [];
-export const selectAllProjects = state => state.projects.projects;
 export const selectCurrentProject = state => state.projects.currentProject;
 export default projectsSlice.reducer;
