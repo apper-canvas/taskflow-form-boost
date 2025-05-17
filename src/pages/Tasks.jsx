@@ -7,6 +7,7 @@ const Tasks = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', status: 'pending', priority: 'medium', dueDate: '' });
+  const [editingTask, setEditingTask] = useState(null);
   
   const SearchIcon = getIcon('Search');
   const FilterIcon = getIcon('Filter');
@@ -31,27 +32,37 @@ const Tasks = () => {
       toast.error("Task title is required!");
       return;
     }
+
+    if (editingTask) {
+      // Update existing task
+      const updatedTasks = tasksList.map(task => 
+        task.id === editingTask.id ? { ...task, ...newTask } : task
+      );
+      setTasksList(updatedTasks);
+      toast.success("Task updated successfully!");
+    } else {
+      // Create a new task with all required properties
+      const newTaskWithId = {
+        id: Date.now(), // Generate unique ID
+        title: newTask.title,
+        description: newTask.description || "",
+        status: newTask.status || "pending",
+        priority: newTask.priority || "medium",
+        dueDate: newTask.dueDate || "",
+        assignee: "You"
+      };
     
-    // Create a new task with all required properties
-    const newTaskWithId = {
-      id: Date.now(), // Generate unique ID
-      title: newTask.title,
-      description: newTask.description || "",
-      status: newTask.status || "pending",
-      priority: newTask.priority || "medium",
-      dueDate: newTask.dueDate || "",
-      assignee: "You"
-    };
-    
-    // Add the new task to the list
-    setTasksList([...tasksList, newTaskWithId]);
-    
-    // Show success message
-    toast.success("New task added successfully!");
+      // Add the new task to the list
+      setTasksList([...tasksList, newTaskWithId]);
+      
+      // Show success message
+      toast.success("New task added successfully!");
+    }
     
     // Reset form and hide it
     setNewTask({ title: '', description: '', status: 'pending', priority: 'medium', dueDate: '' });
     setIsFormVisible(false);
+    setEditingTask(null);
   };
   
   const handleChange = (e) => {
@@ -59,7 +70,16 @@ const Tasks = () => {
     setNewTask({ ...newTask, [name]: value });
   };
   
-  const handleCancel = () => setIsFormVisible(false);
+  const handleEdit = (task) => {
+    setEditingTask(task);
+    setNewTask({ ...task });
+    setIsFormVisible(true);
+  };
+  
+  const handleCancel = () => {
+    setIsFormVisible(false);
+    setEditingTask(null);
+  };
   
   const filteredTasks = selectedStatus === 'all'
     ? tasksList
@@ -146,7 +166,7 @@ return (
           >
             <form onSubmit={handleSubmit} className="card-glass">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">New Task</h3>
+                <h3 className="text-xl font-semibold">{editingTask ? 'Edit Task' : 'New Task'}</h3>
                 <button 
                   type="button" 
                   onClick={handleCancel}
@@ -224,7 +244,7 @@ return (
               
               <div className="flex justify-end gap-3">
                 <button type="button" onClick={handleCancel} className="btn-outline">Cancel</button>
-                <button type="submit" className="btn-primary shadow-float">Add Task</button>
+                <button type="submit" className="btn-primary shadow-float">{editingTask ? 'Update Task' : 'Add Task'}</button>
               </div>
             </form>
           </motion.div>
@@ -254,7 +274,7 @@ return (
                 <td className="px-4 py-4 text-sm">{new Date(task.dueDate).toLocaleDateString()}</td>
                 <td className="px-4 py-4 text-sm">{task.assignee}</td>
                 <td className="px-4 py-4 text-right space-x-2">
-                  <button className="px-2 py-1 text-xs rounded-md bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors">Edit</button>
+                  <button onClick={() => handleEdit(task)} className="px-2 py-1 text-xs rounded-md bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors">Edit</button>
                   <button className="px-2 py-1 text-xs rounded-md bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/30 transition-colors">Delete</button>
                 </td>
               </motion.tr>
