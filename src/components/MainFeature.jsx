@@ -65,33 +65,37 @@ const MainFeature = ({ project }) => {
   }, [project]);
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     
     // Validate required fields
     if (!newTask.title.trim()) {
       toast.error("Task title is required!");
       return;
     }
-
+    
     if (editingTask) {
       // Update existing task
-      const updatedTasks = tasks.map(task => 
+      const updatedTasks = tasks.map(task =>
         task.id === editingTask.id ? { ...task, ...newTask } : task
       );
       setTasks(updatedTasks);
       toast.success("Task updated successfully");
       setEditingTask(null);
     } else {
-      // Add new task
+      // Create a new task with all required properties
       const newTaskWithId = {
-        id: Date.now(),
-        ...newTask
+        id: Date.now(), // Generate unique ID
+        title: newTask.title,
+        description: newTask.description || "",
+        status: newTask.status || "todo",
+        priority: newTask.priority || "medium",
+        dueDate: newTask.dueDate || ""
       };
-      setTasks(prevTasks => [...prevTasks, newTaskWithId]);
+      setTasks([...tasks, newTaskWithId]);
       toast.success("New task added successfully!");
     }
     
-    setNewTask({ title: '', description: '', status: 'todo', priority: 'medium' });
+    setNewTask({ title: '', description: '', status: 'todo', priority: 'medium', dueDate: '' });
     setIsFormVisible(false);
   };
 
