@@ -20,6 +20,8 @@ const MainFeature = ({ project }) => {
   const XIcon = getIcon('X');
   const KanbanIcon = getIcon('LayoutGrid');
   const ListIcon = getIcon('List');
+  const ArrowLeftIcon = getIcon('ArrowLeft');
+  const ClipboardListIcon = getIcon('ClipboardList');
 
   useEffect(() => {
     if (project) {
@@ -167,14 +169,14 @@ const MainFeature = ({ project }) => {
       >
         <div className="bg-surface-100 dark:bg-surface-800 p-8 rounded-2xl max-w-md shadow-neu-light dark:shadow-neu-dark">
           <div className="text-primary mb-4">
-            {getIcon('ClipboardList')({ size: 48 })}
+            <ClipboardListIcon size={48} />
           </div>
           <h3 className="text-2xl font-bold mb-3">Welcome to TaskFlow</h3>
           <p className="text-surface-600 dark:text-surface-300 mb-6">
             Select a project from the list to view and manage its tasks, or create a new project to get started.
           </p>
           <div className="py-2 px-4 bg-primary/10 dark:bg-primary/20 rounded-lg text-primary font-medium inline-flex items-center">
-            {getIcon('ArrowLeft')({ size: 18, className: "mr-2" })}
+            <ArrowLeftIcon size={18} className="mr-2" />
             Select a project
           </div>
         </div>
@@ -392,9 +394,9 @@ const MainFeature = ({ project }) => {
                       className="py-8 flex flex-col items-center justify-center text-center text-surface-500"
                     >
                       <div className="mb-2 opacity-70">
-                        {column.id === 'todo' ? getIcon('ClipboardList')({ size: 24 }) : 
-                         column.id === 'inprogress' ? getIcon('Clock')({ size: 24 }) :
-                         getIcon('CheckCircle')({ size: 24 })}
+                        {column.id === 'todo' ? <ClipboardListIcon size={24} /> : 
+                         column.id === 'inprogress' ? <ClockIcon size={24} /> :
+                         <CheckCircleIcon size={24} />}
                       </div>
                       <p className="text-sm">No tasks here</p>
                     </motion.div>
