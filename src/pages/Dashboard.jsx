@@ -137,6 +137,7 @@ const Dashboard = () => {
                 <ArrowUpIcon size={14} className="mr-1" /> Active
               </span>
             </div>
+        </motion.div>
 
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -170,7 +171,6 @@ const Dashboard = () => {
               </span>
             </div>
         </motion.div>
-      </div>
       
       {/* Projects List */}
       <div className="mt-8">
