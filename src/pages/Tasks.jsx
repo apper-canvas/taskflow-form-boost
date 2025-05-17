@@ -10,6 +10,7 @@ const Tasks = () => {
   
   const SearchIcon = getIcon('Search');
   const FilterIcon = getIcon('Filter');
+  const XIcon = getIcon('X');
   const PlusIcon = getIcon('Plus'); 
   
   const tasks = [
@@ -151,7 +152,7 @@ return (
                   onClick={handleCancel}
                   className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                 >
-                  {getIcon('X')(20)}
+                  <XIcon size={20} />
                 </button>
               </div>
               
