@@ -109,3 +109,6 @@ export const simulateLoading = createAsyncThunk(
 // Export selectors
 export const selectAllProjects = state => state.projects.projects;
 export const selectProjectStatus = state => state.projects.status;
+
+// Export the reducer as default for use in the store
+export default projectsSlice.reducer;
