@@ -102,6 +102,10 @@
     @apply glass-effect rounded-xl px-4 py-2 hover:bg-white/40 dark:hover:bg-surface-700/40 transition-all duration-300;
   }
   
+  .nav-link-active {
+    @apply bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium;
+  }
+  
   .floating {
     @apply animate-float;
   }

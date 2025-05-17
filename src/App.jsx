@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { motion } from 'framer-motion';
+import Header from './components/Header';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import Dashboard from './pages/Dashboard';
+import Tasks from './pages/Tasks';
+import Calendar from './pages/Calendar';
 
 function App() {
   const [darkMode, setDarkMode] = useState(
@@ -61,8 +65,13 @@ function App() {
         </motion.button>
       </motion.div>
 
+      {/* Header with navigation */}
+      <Header />
+      
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/calendar" element={<Calendar />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 
