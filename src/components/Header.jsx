@@ -26,11 +26,10 @@ const Header = () => {
       console.error("Logout failed:", error);
     }
   };
+  
   const LogOutIcon = getIcon('LogOut');
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  
+  return (
     <header className="sticky top-0 z-50 w-full shadow-sm">
       <div className="glass-effect border-b border-white/30 dark:border-surface-700/30">
         <div className="container mx-auto px-4 py-4">
@@ -150,7 +149,6 @@ const Header = () => {
     </header>
   );
 
-  return (
 };
 
 export default Header;
