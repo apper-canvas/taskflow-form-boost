@@ -3,7 +3,7 @@ import {
   fetchProjects, 
   createNewProject, 
   deleteProject as deleteProjectService,
-  fetchProjectById,
+  fetchProjectById as fetchProjectByIdService,
   updateProject as updateProjectService } from '../../services/projectService';
 
 const initialState = {
@@ -23,7 +23,7 @@ export const fetchProjectById = createAsyncThunk(
   'projects/fetchById',
   async (projectId, { rejectWithValue }) => {
     try {
-      const project = await fetchProjectById(projectId);
+      const project = await fetchProjectByIdService(projectId);
       if (!project) {
         return rejectWithValue('Project not found');
       }
