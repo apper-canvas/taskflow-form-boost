@@ -5,7 +5,7 @@ import { getIcon } from '../utils/iconUtils';
 
 const MainFeature = ({ project }) => {
   const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState({ title: '', description: '', status: 'todo', priority: 'medium' });
+  const [newTask, setNewTask] = useState({ title: '', description: '', status: 'todo', priority: 'medium', dueDate: '' });
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [kanbanView, setKanbanView] = useState(true);
@@ -65,24 +65,30 @@ const MainFeature = ({ project }) => {
   }, [project]);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     
+    // Validate required fields
+    if (!newTask.title.trim()) {
+      toast.error("Task title is required!");
+      return;
+    }
+
     if (editingTask) {
       // Update existing task
       const updatedTasks = tasks.map(task => 
         task.id === editingTask.id ? { ...task, ...newTask } : task
       );
       setTasks(updatedTasks);
-      toast.success("Task updated successfully!");
+      toast.success("Task updated successfully");
       setEditingTask(null);
     } else {
       // Add new task
-      const task = {
+      const newTaskWithId = {
         id: Date.now(),
         ...newTask
       };
-      setTasks([...tasks, task]);
-      toast.success("New task added!");
+      setTasks(prevTasks => [...prevTasks, newTaskWithId]);
+      toast.success("New task added successfully!");
     }
     
     setNewTask({ title: '', description: '', status: 'todo', priority: 'medium' });
@@ -217,7 +223,7 @@ const MainFeature = ({ project }) => {
             onClick={() => {
               setIsFormVisible(true);
               setEditingTask(null);
-              setNewTask({ title: '', description: '', status: 'todo', priority: 'medium' });
+              setNewTask({ title: '', description: '', status: 'todo', priority: 'medium', dueDate: '' });
             }}
             className="btn-primary"
           >
@@ -482,7 +488,7 @@ const MainFeature = ({ project }) => {
                           <button 
                             onClick={() => {
                               setIsFormVisible(true);
-                              setEditingTask(null);
+                              setEditingTask(null); 
                               setNewTask({ title: '', description: '', status: 'todo', priority: 'medium' });
                             }}
                             className="mt-3 text-primary hover:text-primary-dark font-medium text-sm flex items-center"
