@@ -6,6 +6,7 @@ import { getIcon } from '../utils/iconUtils';
 import NewProjectModal from '../components/projects/NewProjectModal';
 import { selectAllProjects, fetchAllProjects } from '../features/projects/projectsSlice';
 import MainFeature from '../components/MainFeature';
+import FeatureSection from '../components/FeatureSection';
 
 const Dashboard = () => {
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
@@ -85,6 +86,9 @@ const Dashboard = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Main Feature */}
       <MainFeature onNewProject={() => setIsNewProjectModalOpen(true)} />
+
+      {/* Featured Projects Section */}
+      <FeatureSection />
       
       <motion.div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Dashboard</h1>
