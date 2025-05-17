@@ -230,3 +230,44 @@ export default Dashboard;
 };
 
 export default Dashboard;
+            <h3 className="text-lg font-semibold">Tasks Completed</h3>
+            <div className="w-10 h-10 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center">
+              <CheckSquareIcon size={20} className="text-accent" />
+            </div>
+          </div>
+          <div className="flex items-end">
+            <span className="text-3xl font-bold">{completedTasks}/{totalTasks}</span>
+            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">{completionRate}% completion</span>
+          </div>
+        </motion.div>
+      </motion.div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <motion.div 
+            key={index}
+            className="card-glass hover:shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.5 }}
+          >
+            <div className={`w-12 h-12 rounded-xl bg-${stat.color}/15 flex items-center justify-center text-${stat.color} mb-4`}>
+              <stat.icon size={24} />
+            </div>
+            <h3 className="text-2xl font-bold mb-1">{stat.value}</h3>
+            <div className="flex justify-between items-center">
+              <p className="text-surface-600 dark:text-surface-300">{stat.title}</p>
+              <span className={`flex items-center text-sm ${stat.isPositive ? 'text-secondary' : 'text-red-500'}`}>
+                {stat.isPositive ? <ArrowUpIcon size={14} className="mr-1" /> : <ArrowDownIcon size={14} className="mr-1" />} {stat.change}
+              </span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      
+      {/* New Project Modal */}
+      <NewProjectModal 
+        isOpen={isNewProjectModalOpen} 
+        onClose={() => setIsNewProjectModalOpen(false)} 
+      />
+    </div>
