@@ -36,11 +36,10 @@ function App() {
         transition={{ duration: 0.3 }}
         className="fixed bottom-6 right-6 z-50 floating"
       >
-        <button
+        <motion.button
           onClick={toggleDarkMode}
           className="p-3.5 rounded-full glass-effect hover:shadow-glow transition-all duration-300 border border-white/40 dark:border-surface-600/40 hover:scale-105"
           whileHover={{ scale: 1.05 }}
-          aria-label="Toggle dark mode"
         >
           {darkMode ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400">
@@ -59,7 +58,7 @@ function App() {
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           )}
-        </button>
+        </motion.button>
       </motion.div>
 
       <Routes>
