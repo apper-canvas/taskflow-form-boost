@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 import { getIcon } from '../utils/iconUtils';
 import NewProjectModal from '../components/projects/NewProjectModal';
 import { selectAllProjects } from '../features/projects/projectsSlice';
-import { getIcon } from '../utils/iconUtils';
 
+const Dashboard = () => {
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   const projects = useSelector(selectAllProjects);
   
@@ -17,6 +17,8 @@ import { getIcon } from '../utils/iconUtils';
   const UsersIcon = getIcon('Users');
   const ClockIcon = getIcon('Clock');
   const CheckSquareIcon = getIcon('CheckSquare');
+  const ArrowUpIcon = getIcon('ArrowUp');
+  const ArrowDownIcon = getIcon('ArrowDown');
   
   // Stats calculations
   const totalProjects = projects.length;
@@ -58,8 +60,44 @@ import { getIcon } from '../utils/iconUtils';
       transition: { duration: 0.4, ease: "easeOut" }
     }
   };
+  
+  // Sample stats for demonstration
+  const stats = [
+    { 
+      title: "Total Projects", 
+      value: totalProjects.toString(), 
+      change: "+8.1%", 
+      isPositive: true,
+      icon: FolderIcon,
+      color: "primary"
+    },
+    { 
+      title: "Team Members", 
+      value: totalTeamMembers.toString(), 
+      change: "+12%", 
+      isPositive: true,
+      icon: UsersIcon,
+      color: "tertiary"
+    },
+    { 
+      title: "Hours Tracked", 
+      value: hoursTracked.toString(), 
+      change: "-4.3%", 
+      isPositive: false,
+      icon: ClockIcon,
+      color: "secondary"
+    },
+    { 
+      title: "Tasks Completed", 
+      value: `${completedTasks}/${totalTasks}`, 
+      change: "+23.1%", 
+      isPositive: true,
+      icon: CheckSquareIcon,
+      color: "accent"
+    }
+  ];
 
-const Dashboard = () => {
+  return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -71,77 +109,6 @@ const Dashboard = () => {
             <PlusIcon size={18} className="mr-1.5" />
             New Project
           </button>
-          <button 
-            onClick={handleExport}
-            className="btn-outline flex items-center"
-          >
-            <DownloadIcon size={18} className="mr-1.5" />
-            Export
-          </button>
-      color: "primary"
-    },
-      
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Total Projects */}
-        <motion.div variants={itemVariants} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Total Projects</h3>
-            <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-              <FolderIcon size={20} className="text-primary" />
-            </div>
-          </div>
-          <div className="flex items-end">
-            <span className="text-3xl font-bold">{totalProjects}</span>
-            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">active projects</span>
-          </div>
-        </motion.div>
-        
-        {/* Team Members */}
-        <motion.div variants={itemVariants} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Team Members</h3>
-            <div className="w-10 h-10 rounded-full bg-tertiary/10 dark:bg-tertiary/20 flex items-center justify-center">
-              <UsersIcon size={20} className="text-tertiary" />
-            </div>
-          </div>
-          <div className="flex items-end">
-            <span className="text-3xl font-bold">{totalTeamMembers}</span>
-            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">across all projects</span>
-          </div>
-        </motion.div>
-        
-        {/* Hours Tracked */}
-        <motion.div variants={itemVariants} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Hours Tracked</h3>
-            <div className="w-10 h-10 rounded-full bg-secondary/10 dark:bg-secondary/20 flex items-center justify-center">
-              <ClockIcon size={20} className="text-secondary" />
-            </div>
-          </div>
-          <div className="flex items-end">
-            <span className="text-3xl font-bold">{hoursTracked}</span>
-            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">total hours</span>
-          </div>
-        </motion.div>
-        
-        {/* Tasks Completed */}
-        <motion.div variants={itemVariants} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Tasks Completed</h3>
-            <div className="w-10 h-10 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center">
-              <CheckSquareIcon size={20} className="text-accent" />
-            </div>
-          </div>
-          <div className="flex items-end">
-            <span className="text-3xl font-bold">{completedTasks}/{totalTasks}</span>
-            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">{completionRate}% completion</span>
-          </div>
-        </motion.div>
       </motion.div>
       
       {/* New Project Modal */}
@@ -149,97 +116,13 @@ const Dashboard = () => {
         isOpen={isNewProjectModalOpen} 
         onClose={() => setIsNewProjectModalOpen(false)} 
       />
-    { 
-      title: "Team Members", 
-      value: "24", 
-      change: "+12%", 
-      icon: UsersIcon,
-export default Dashboard;
-      color: "tertiary"
-    },
-    { 
-      title: "Hours Tracked", 
-      value: "186", 
-      change: "-4.3%", 
-      isPositive: false,
-      icon: ClockIcon,
-      color: "secondary"
-    },
-    { 
-      title: "Tasks Completed", 
-      value: "64", 
-      change: "+23.1%", 
-      isPositive: true,
-      icon: CheckCircleIcon,
-      color: "accent"
-    }
-  ];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-8 space-y-8"
-    >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="flex space-x-3">
-          <button className="btn-outline flex items-center space-x-2">
-            <span>Export</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-          </button>
-          <button className="btn-primary flex items-center space-x-2">
-            <span>New Project</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <motion.div 
-            key={index}
-            className="card-glass hover:shadow-lg"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
+    </div>
+          <button 
+            onClick={handleExport}
+            className="btn-outline flex items-center"
           >
-            <div className={`w-12 h-12 rounded-xl bg-${stat.color}/15 flex items-center justify-center text-${stat.color} mb-4`}>
-              <stat.icon size={24} />
-            </div>
-            <h3 className="text-2xl font-bold mb-1">{stat.value}</h3>
-            <div className="flex justify-between items-center">
-              <p className="text-surface-600 dark:text-surface-300">{stat.title}</p>
-              <span className={`flex items-center text-sm ${stat.isPositive ? 'text-secondary' : 'text-red-500'}`}>
-                {stat.isPositive ? <ArrowUpIcon size={14} className="mr-1" /> : <ArrowDownIcon size={14} className="mr-1" />} {stat.change}
-              </span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
-  );
-};
-
-export default Dashboard;
-            <h3 className="text-lg font-semibold">Tasks Completed</h3>
-            <div className="w-10 h-10 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center">
-              <CheckSquareIcon size={20} className="text-accent" />
-            </div>
-          </div>
-          <div className="flex items-end">
-            <span className="text-3xl font-bold">{completedTasks}/{totalTasks}</span>
-            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">{completionRate}% completion</span>
-          </div>
-        </motion.div>
+            <DownloadIcon size={18} className="mr-1.5" />
+            Export
       </motion.div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
