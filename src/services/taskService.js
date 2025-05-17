@@ -124,6 +124,7 @@ export const updateTask = async (taskId, taskData) => {
     const mappedTask = {
       Id: taskId,
       Name: taskData.title,
+      project: taskData.projectId,
       title: taskData.title,
       description: taskData.description,
       status: taskData.status,

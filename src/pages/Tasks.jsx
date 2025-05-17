@@ -5,6 +5,8 @@ import { getIcon } from '../utils/iconUtils';
 import { fetchTasks, createTask, updateTask } from '../services/taskService';
 import { fetchProjects } from '../services/projectService';
 
+import NewTaskModal from '../components/tasks/NewTaskModal';
+
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -99,25 +101,13 @@ const Tasks = () => {
 
   // Handle task creation/update
   const handleTaskSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      if (selectedTask) {
-        // Update existing task
-        await updateTask(selectedTask.Id, taskForm);
-        toast.success("Task updated successfully");
-      } else {
-        // Create new task
-        await createTask(taskForm);
-        toast.success("Task created successfully");
-      }
-      
-      // Reload tasks
+    // Reload tasks after successful task creation/update
+    try {  
       const updatedTasks = await fetchTasks();
-      setTasks(updatedTasks);
-      
-      // Close modal
+      setTasks(updatedTasks);      
       setIsTaskModalOpen(false);
+      return true;
+            
     } catch (error) {
       toast.error(selectedTask ? "Failed to update task" : "Failed to create task");
     }
@@ -177,7 +167,7 @@ const Tasks = () => {
           </div>
           <button 
             onClick={openNewTaskModal}
-            className="btn-primary flex items-center"
+            className="btn-primary flex items-center justify-center"
           >
             <PlusIcon size={18} className="mr-1.5" />
             New Task
@@ -192,7 +182,7 @@ const Tasks = () => {
             <p className="text-surface-500 dark:text-surface-400 mb-4">No tasks found</p>
             <button 
               onClick={openNewTaskModal}
-              className="btn-outline flex items-center mx-auto"
+              className="btn-outline flex items-center justify-center mx-auto"
             >
               <PlusIcon size={18} className="mr-1.5" />
               Create First Task
@@ -292,169 +282,14 @@ const Tasks = () => {
       </div>
 
       {/* Task Modal */}
-      {isTaskModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsTaskModalOpen(false)}></div>
-          <div className="flex items-center justify-center min-h-screen p-4">
-            <motion.div 
-              className="relative w-full max-w-2xl glass-card border border-white/30 dark:border-surface-700/30 shadow-float"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">
-                  {selectedTask ? 'Edit Task' : 'Create New Task'}
-                </h2>
-                <button 
-                  className="p-1 rounded-full hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors" 
-                  onClick={() => setIsTaskModalOpen(false)}
-                >
-                  <XIcon size={20} />
-                </button>
-              </div>
-              
-              <form onSubmit={handleTaskSubmit}>
-                <div className="mb-4">
-                  <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="title">
-                    Task Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={taskForm.title}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    placeholder="Enter task title"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="description">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={taskForm.description}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    rows="3"
-                    placeholder="Enter task description"
-                  ></textarea>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="projectId">
-                      Project
-                    </label>
-                    <select
-                      id="projectId"
-                      name="projectId"
-                      value={taskForm.projectId}
-                      onChange={handleInputChange}
-                      className="input-field"
-                    >
-                      <option value="">Select Project</option>
-                      {projects.map(project => (
-                        <option key={project.Id} value={project.Id}>{project.Name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="status">
-                      Status
-                    </label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={taskForm.status}
-                      onChange={handleInputChange}
-                      className="input-field"
-                    >
-                      <option value="Not Started">Not Started</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="priority">
-                      Priority
-                    </label>
-                    <select
-                      id="priority"
-                      name="priority"
-                      value={taskForm.priority}
-                      onChange={handleInputChange}
-                      className="input-field"
-                    >
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="assignee">
-                      Assignee
-                    </label>
-                    <select
-                      id="assignee"
-                      name="assignee"
-                      value={taskForm.assignee}
-                      onChange={handleInputChange}
-                      className="input-field"
-                    >
-                      <option value="">Select Assignee</option>
-                      {["Alex S.", "Jamie L.", "Taylor R.", "Morgan W.", "Casey P.", "Jordan B.", "Riley T.", "Blake M.", "Avery D."].map(member => (
-                        <option key={member} value={member}>{member}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="dueDate">
-                    Due Date
-                  </label>
-                  <input
-                    type="date"
-                    id="dueDate"
-                    name="dueDate"
-                    value={taskForm.dueDate}
-                    onChange={handleInputChange}
-                    className="input-field"
-                  />
-                </div>
-                
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    className="btn bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border border-surface-300 dark:border-surface-600 text-surface-800 dark:text-surface-200"
-                    onClick={() => setIsTaskModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn-primary"
-                  >
-                    {selectedTask ? 'Update Task' : 'Create Task'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        </div>
-      )}
+      <NewTaskModal 
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        task={selectedTask}
+        initialProject={selectedTask?.project || ''}
+        onSuccess={handleTaskSubmit}
+      />
+      
     </div>
   );
 };
