@@ -16,7 +16,7 @@ const initialState = {
 // Async thunk to fetch projects
 export const fetchAllProjects = createAsyncThunk('projects/fetchAll', async () => {
   return await fetchProjects();
-};
+});
 
 // Async thunk to fetch a single project by ID
 export const fetchProjectById = createAsyncThunk(
