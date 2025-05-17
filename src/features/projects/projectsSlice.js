@@ -1,4 +1,4 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createSlice, nanoid, createAsyncThunk } from '@reduxjs/toolkit';
 
 // Initial sample projects data
 const initialState = {
@@ -47,15 +47,9 @@ export const projectsSlice = createSlice({
   reducers: {
     // Add a new project
     createProject: {
-      reducer(state, action) {
-        // Set status to 'loading' to simulate API call
-        state.status = 'loading';
-        
-        // In a real app, this would be handled by createAsyncThunk
-        setTimeout(() => {
-          state.status = 'succeeded';
-          state.projects.push(action.payload);
-        }, 500);
+      reducer(state, action) {        
+        // Directly add the project to state - no async operations in reducers
+        state.projects.push(action.payload);
       },
       prepare(projectData) {
         // Generate an ID and add creation date
@@ -94,8 +88,24 @@ export const projectsSlice = createSlice({
 // Export actions and reducer
 export const { createProject, deleteProject, updateProject, updateProjectStatus } = projectsSlice.actions;
 
+// Thunk to simulate loading when creating a project
+export const simulateLoading = createAsyncThunk(
+  'projects/simulateLoading',
+  async (projectData, { dispatch }) => {
+    // Set loading state
+    dispatch(updateProjectStatus('loading'));
+    
+    // Create the project
+    dispatch(createProject(projectData));
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Set success state
+    dispatch(updateProjectStatus('succeeded'));
+  }
+);
+
 // Export selectors
 export const selectAllProjects = state => state.projects.projects;
 export const selectProjectStatus = state => state.projects.status;
-
-export default projectsSlice.reducer;
