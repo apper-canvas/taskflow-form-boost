@@ -8,6 +8,9 @@ const Home = () => {
   const [activeProject, setActiveProject] = useState(null);
   const LogoIcon = getIcon('ClipboardList');
   const PlusIcon = getIcon('Plus');
+  const DashboardIcon = getIcon('LayoutDashboard');
+  const TaskIcon = getIcon('CheckSquare');
+  const CalendarIcon = getIcon('Calendar');
   
   const projects = [
     { 
@@ -82,19 +85,19 @@ const Home = () => {
             <button className="px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
               <span className="hidden md:inline-block mr-1">Dashboard</span>
               <span className="inline-block md:hidden">
-                {getIcon('LayoutDashboard')({ size: 18 })}
+                <DashboardIcon size={18} />
               </span>
             </button>
             <button className="px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
               <span className="hidden md:inline-block mr-1">Tasks</span>
               <span className="inline-block md:hidden">
-                {getIcon('CheckSquare')({ size: 18 })}
+                <TaskIcon size={18} />
               </span>
             </button>
             <button className="px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
               <span className="hidden md:inline-block mr-1">Calendar</span>
               <span className="inline-block md:hidden">
-                {getIcon('Calendar')({ size: 18 })}
+                <CalendarIcon size={18} />
               </span>
             </button>
           </div>
