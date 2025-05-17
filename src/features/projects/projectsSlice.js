@@ -82,12 +82,7 @@ export const createProject = createAsyncThunk(
 );
 
 // Export actions
-export const { 
-  updateProject, 
-  updateProjectStatus,
-  setCurrentProject,
-  deleteProject
-};
+export const { updateProject, updateProjectStatus, setCurrentProject, deleteProject } = projectsSlice.actions;
 
 export const selectAllProjects = state => state.projects.projects || [];
 export const selectCurrentProject = state => state.projects.currentProject;
