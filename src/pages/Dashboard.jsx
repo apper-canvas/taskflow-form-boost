@@ -1,29 +1,160 @@
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import { getIcon } from '../utils/iconUtils';
+import NewProjectModal from '../components/projects/NewProjectModal';
+import { selectAllProjects } from '../features/projects/projectsSlice';
 import { getIcon } from '../utils/iconUtils';
 
-const Dashboard = () => {
-  const ChartIcon = getIcon('BarChart');
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+  const projects = useSelector(selectAllProjects);
+  
+  // Get icons
+  const PlusIcon = getIcon('Plus');
+  const DownloadIcon = getIcon('Download');
+  const FolderIcon = getIcon('Folder');
   const UsersIcon = getIcon('Users');
   const ClockIcon = getIcon('Clock');
-  const CheckCircleIcon = getIcon('CheckCircle');
-  const ArrowUpIcon = getIcon('ArrowUp');
-  const ArrowDownIcon = getIcon('ArrowDown');
+  const CheckSquareIcon = getIcon('CheckSquare');
   
-  const stats = [
-    { 
-      title: "Total Projects", 
-      value: "12", 
-      change: "+8.2%", 
-      isPositive: true,
-      icon: ChartIcon,
+  // Stats calculations
+  const totalProjects = projects.length;
+  const totalTeamMembers = [...new Set(projects.flatMap(p => p.team))].length;
+  const totalTasks = projects.reduce((sum, project) => sum + project.tasks, 0);
+  const completedTasks = projects.reduce((sum, project) => sum + project.completedTasks, 0);
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  
+  // Calculate total hours (fictional data for demonstration)
+  const hoursTracked = projects.reduce((sum, project) => {
+    // Generate a consistent but random-looking number of hours per project
+    const projectHours = Math.floor(project.tasks * 2.5);
+    return sum + projectHours;
+  }, 0);
+  
+  const handleExport = () => {
+    toast.info("Exporting dashboard data...");
+    setTimeout(() => {
+      toast.success("Dashboard data exported successfully!");
+    }, 1500);
+  };
+  
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.4, ease: "easeOut" }
+    }
+  };
+
+const Dashboard = () => {
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="flex space-x-3">
+          <button 
+            onClick={() => setIsNewProjectModalOpen(true)}
+            className="btn-primary flex items-center"
+          >
+            <PlusIcon size={18} className="mr-1.5" />
+            New Project
+          </button>
+          <button 
+            onClick={handleExport}
+            className="btn-outline flex items-center"
+          >
+            <DownloadIcon size={18} className="mr-1.5" />
+            Export
+          </button>
       color: "primary"
     },
+      
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Total Projects */}
+        <motion.div variants={itemVariants} className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Total Projects</h3>
+            <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+              <FolderIcon size={20} className="text-primary" />
+            </div>
+          </div>
+          <div className="flex items-end">
+            <span className="text-3xl font-bold">{totalProjects}</span>
+            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">active projects</span>
+          </div>
+        </motion.div>
+        
+        {/* Team Members */}
+        <motion.div variants={itemVariants} className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Team Members</h3>
+            <div className="w-10 h-10 rounded-full bg-tertiary/10 dark:bg-tertiary/20 flex items-center justify-center">
+              <UsersIcon size={20} className="text-tertiary" />
+            </div>
+          </div>
+          <div className="flex items-end">
+            <span className="text-3xl font-bold">{totalTeamMembers}</span>
+            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">across all projects</span>
+          </div>
+        </motion.div>
+        
+        {/* Hours Tracked */}
+        <motion.div variants={itemVariants} className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Hours Tracked</h3>
+            <div className="w-10 h-10 rounded-full bg-secondary/10 dark:bg-secondary/20 flex items-center justify-center">
+              <ClockIcon size={20} className="text-secondary" />
+            </div>
+          </div>
+          <div className="flex items-end">
+            <span className="text-3xl font-bold">{hoursTracked}</span>
+            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">total hours</span>
+          </div>
+        </motion.div>
+        
+        {/* Tasks Completed */}
+        <motion.div variants={itemVariants} className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Tasks Completed</h3>
+            <div className="w-10 h-10 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center">
+              <CheckSquareIcon size={20} className="text-accent" />
+            </div>
+          </div>
+          <div className="flex items-end">
+            <span className="text-3xl font-bold">{completedTasks}/{totalTasks}</span>
+            <span className="ml-2 text-sm text-surface-500 dark:text-surface-400 mb-1">{completionRate}% completion</span>
+          </div>
+        </motion.div>
+      </motion.div>
+      
+      {/* New Project Modal */}
+      <NewProjectModal 
+        isOpen={isNewProjectModalOpen} 
+        onClose={() => setIsNewProjectModalOpen(false)} 
+      />
     { 
       title: "Team Members", 
       value: "24", 
       change: "+12%", 
-      isPositive: true,
       icon: UsersIcon,
+export default Dashboard;
       color: "tertiary"
     },
     { 
