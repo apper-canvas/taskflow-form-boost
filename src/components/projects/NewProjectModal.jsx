@@ -6,7 +6,7 @@ import { getIcon } from '../../utils/iconUtils';
 import ProjectForm from './ProjectForm';
 import { createProject, selectProjectStatus, updateProjectStatus } from '../../features/projects/projectsSlice';
 
-const NewProjectModal = ({ isOpen, onClose }) => {
+const NewProjectModal = ({ isOpen, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const status = useSelector(selectProjectStatus);
   const XIcon = getIcon('X');
@@ -31,6 +31,9 @@ const NewProjectModal = ({ isOpen, onClose }) => {
       
       // Close modal and reset status
       dispatch(updateProjectStatus('idle'));
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) onSuccess(projectData);
       onClose();
     } catch (error) {
       // Handle error

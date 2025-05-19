@@ -1,52 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
 import MainFeature from '../components/MainFeature';
+import NewProjectModal from '../components/projects/NewProjectModal';
 import { getIcon } from '../utils/iconUtils';
+import { fetchAllProjects, selectAllProjects, selectProjectError, selectProjectStatus } from '../features/projects/projectsSlice';
 
 const Home = () => {
   const [activeProject, setActiveProject] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const LogoIcon = getIcon('ClipboardList');
   const PlusIcon = getIcon('Plus');
   const DashboardIcon = getIcon('LayoutDashboard');
   const TaskIcon = getIcon('CheckSquare');
   const CalendarIcon = getIcon('Calendar');
   
-  const projects = [
-    { 
-      id: 1, 
-      name: "Website Redesign", 
-      description: "Complete overhaul of company website with modern design", 
-      progress: 75, 
-      tasks: 24, 
-      completedTasks: 18,
-      dueDate: "2023-07-15", 
-      team: ["Alex S.", "Jamie L.", "Taylor R."] 
-    },
-    { 
-      id: 2, 
-      name: "Mobile App Development", 
-      description: "Create iOS and Android versions of customer portal", 
-      progress: 45, 
-      tasks: 32, 
-      completedTasks: 14,
-      dueDate: "2023-09-30", 
-      team: ["Morgan W.", "Casey P.", "Jordan B.", "Riley T."] 
-    },
-    { 
-      id: 3, 
-      name: "Product Launch Campaign", 
-      description: "Plan and execute marketing campaign for new product", 
-      progress: 30, 
-      tasks: 18, 
-      completedTasks: 5,
-      dueDate: "2023-08-10", 
-      team: ["Blake M.", "Avery D."] 
+  // Get projects from Redux store
+  const dispatch = useDispatch();
+  const projects = useSelector(selectAllProjects);
+  const status = useSelector(selectProjectStatus);
+  const error = useSelector(selectProjectError);
+  
+  // Fetch projects on component mount
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchAllProjects());
     }
-  ];
+  }, [dispatch, status]);
 
   const createNewProject = () => {
-    toast.info("This would open a new project creation form in a complete app");
+    setIsProjectModalOpen(true);
+  };
+  
+  const handleProjectSuccess = () => {
+    setIsProjectModalOpen(false);
+    if (projects.length > 0) {
+      setActiveProject(projects[0]);
+    }
   };
 
   const selectProject = (project) => {
@@ -144,7 +135,34 @@ const Home = () => {
           </div>
 
           <div className="space-y-4">
-            {projects.map(project => (
+            {status === 'loading' && projects.length === 0 ? (
+              <div className="p-4 text-center">
+                <div className="animate-spin inline-block w-6 h-6 border-2 border-primary border-t-transparent rounded-full mb-2"></div>
+                <p>Loading projects...</p>
+              </div>
+            ) : error ? (
+              <div className="p-4 text-center text-red-500">
+                <p>Error loading projects: {error}</p>
+                <button 
+                  onClick={() => dispatch(fetchAllProjects())}
+                  className="mt-2 text-sm underline"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : projects.length === 0 ? (
+              <div className="p-4 text-center">
+                <p className="text-surface-500 mb-2">No projects found</p>
+                <button 
+                  onClick={createNewProject}
+                  className="btn-primary inline-flex items-center"
+                >
+                  <PlusIcon size={16} className="mr-1" />
+                  Create Your First Project
+                </button>
+              </div>
+            ) : (
+              projects.map(project => (
               <motion.div
                 key={project.id}
                 variants={itemVariants}
@@ -191,7 +209,8 @@ const Home = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              ))
+            )}
           </div>
         </motion.div>
 
@@ -199,6 +218,12 @@ const Home = () => {
           <MainFeature project={activeProject} />
         </div>
       </main>
+      
+      {/* Project Modal */}
+      <NewProjectModal 
+        isOpen={isProjectModalOpen} 
+        onClose={() => setIsProjectModalOpen(false)}
+        onSuccess={handleProjectSuccess} />
     </div>
   );
 };
