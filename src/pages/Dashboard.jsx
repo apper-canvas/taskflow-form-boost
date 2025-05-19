@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { AuthContext } from '../App';
 import FloatingActionButton from '../components/FloatingActionButton';
 
+import NewProjectModal from '../components/projects/NewProjectModal';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
