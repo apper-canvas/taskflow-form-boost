@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { getIcon } from '../../utils/iconUtils';
-import { fetchProjects } from '../../services/projectService';
 import { createTask, updateTask } from '../../services/taskService';
+import { fetchProjects } from '../../services/projectService';
 
-const TaskForm = ({ 
-  task = null, 
-  initialProject = '', 
-  onSuccess, 
-  onCancel 
-}) => {
+const TaskForm = ({ task = null, initialProject = '', onSuccess, onCancel }) => {
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,57 +17,53 @@ const TaskForm = ({
     projectId: initialProject || ''
   });
 
-  // Get icons
-  const LoaderIcon = getIcon('Loader');
-
-  // Load projects for dropdown
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const projectData = await fetchProjects();
-        setProjects(projectData);
-      } catch (error) {
-        toast.error("Failed to load projects: " + error.message);
-      }
-    };
-    
-    loadProjects();
-  }, []);
-
-  // If editing, populate form with task data
+  // If task is provided, populate form with task data
   useEffect(() => {
     if (task) {
       setFormData({
         title: task.title || '',
         description: task.description || '',
         status: task.status || 'Not Started',
-        dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
+        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         priority: task.priority || 'Medium',
         assignee: task.assignee || '',
-        projectId: task.project || initialProject || ''
+        projectId: task.project || initialProject
       });
     } else if (initialProject) {
-      setFormData(prev => ({
-        ...prev,
-        projectId: initialProject
-      }));
+      setFormData(prev => ({ ...prev, projectId: initialProject }));
     }
   }, [task, initialProject]);
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
+  // Load projects for dropdown
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const projectsData = await fetchProjects();
+        setProjects(projectsData);
+      } catch (error) {
+        console.error("Error loading projects:", error);
+        toast.error("Failed to load projects");
+      }
+    };
+
+    loadProjects();
+  }, []);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.title.trim()) {
+      toast.error("Task title is required");
+      return;
+    }
+    
     setIsLoading(true);
-
+    
     try {
       if (task) {
         // Update existing task
@@ -83,14 +74,11 @@ const TaskForm = ({
         await createTask(formData);
         toast.success("Task created successfully");
       }
-
-      // Call the success callback
-      if (onSuccess) {
-        onSuccess();
-      }
+      
+      if (onSuccess) onSuccess();
     } catch (error) {
+      console.error("Error saving task:", error);
       toast.error(task ? "Failed to update task" : "Failed to create task");
-      console.error("Task operation failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -99,140 +87,75 @@ const TaskForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="title">
-          Task Title*
-        </label>
+        <label className="block text-sm font-medium mb-1">Title*</label>
         <input
           type="text"
-          id="title"
           name="title"
           value={formData.title}
-          onChange={handleInputChange}
+          onChange={handleChange}
           className="input-field"
-          placeholder="Enter task title"
+          placeholder="Task title"
           required
         />
       </div>
       
       <div>
-        <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="description">
-          Description
-        </label>
+        <label className="block text-sm font-medium mb-1">Description</label>
         <textarea
-          id="description"
           name="description"
           value={formData.description}
-          onChange={handleInputChange}
-          className="input-field"
-          rows="3"
-          placeholder="Enter task description"
-        ></textarea>
+          onChange={handleChange}
+          className="input-field min-h-[100px]"
+          placeholder="Task description"
+        />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="projectId">
-            Project
-          </label>
-          <select
-            id="projectId"
-            name="projectId"
-            value={formData.projectId}
-            onChange={handleInputChange}
-            className="input-field"
-          >
-            <option value="">Select Project</option>
-            {projects.map(project => (
-              <option key={project.Id} value={project.Id}>{project.Name}</option>
-            ))}
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="status">
-            Status
-          </label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleInputChange}
-            className="input-field"
-          >
+          <label className="block text-sm font-medium mb-1">Status</label>
+          <select name="status" value={formData.status} onChange={handleChange} className="input-field">
             <option value="Not Started">Not Started</option>
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
           </select>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="priority">
-            Priority
-          </label>
-          <select
-            id="priority"
-            name="priority"
-            value={formData.priority}
-            onChange={handleInputChange}
-            className="input-field"
-          >
+          <label className="block text-sm font-medium mb-1">Priority</label>
+          <select name="priority" value={formData.priority} onChange={handleChange} className="input-field">
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
             <option value="High">High</option>
           </select>
         </div>
-        
         <div>
-          <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="assignee">
-            Assignee
-          </label>
-          <select
-            id="assignee"
-            name="assignee"
-            value={formData.assignee}
-            onChange={handleInputChange}
-            className="input-field"
-          >
+          <label className="block text-sm font-medium mb-1">Due Date</label>
+          <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} className="input-field" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Assignee</label>
+          <select name="assignee" value={formData.assignee} onChange={handleChange} className="input-field">
             <option value="">Select Assignee</option>
-            {["Alex S.", "Jamie L.", "Taylor R.", "Morgan W.", "Casey P.", "Jordan B.", "Riley T.", "Blake M.", "Avery D."].map(member => (
-              <option key={member} value={member}>{member}</option>
+            {["Alex S.", "Jamie L.", "Taylor R.", "Morgan W.", "Casey P.", "Jordan B.", "Riley T.", "Blake M.", "Avery D."].map(name => (
+              <option key={name} value={name}>{name}</option>
             ))}
           </select>
         </div>
       </div>
       
-      <div>
-        <label className="block text-surface-700 dark:text-surface-300 mb-2" htmlFor="dueDate">
-          Due Date
-        </label>
-        <input
-          type="date"
-          id="dueDate"
-          name="dueDate"
-          value={formData.dueDate}
-          onChange={handleInputChange}
-          className="input-field"
-        />
-      </div>
-      
       <div className="flex justify-end space-x-3 pt-4">
-        <button
-          type="button"
-          className="btn bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border border-surface-300 dark:border-surface-600 text-surface-800 dark:text-surface-200"
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="btn-primary flex items-center"
-          disabled={isLoading}
-        >
-          {isLoading ? <LoaderIcon className="animate-spin mr-2" size={16} /> : null}
-          {task ? 'Update Task' : 'Create Task'}
+        <button type="button" onClick={onCancel} className="btn-outline" disabled={isLoading}>Cancel</button>
+        <button type="submit" className="btn-primary" disabled={isLoading}>
+          {isLoading ? (
+            <span className="inline-flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {task ? 'Updating...' : 'Creating...'}
+            </span>
+          ) : (
+            <span>{task ? 'Update Task' : 'Create Task'}</span>
+          )}
         </button>
       </div>
     </form>

@@ -185,6 +185,7 @@ function App() {
           <Route path="/callback" element={<Callback />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/" element={isAuthenticated ? <Dashboard /> : <Login />} />
+          <Route path="/tasks" element={<Tasks />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

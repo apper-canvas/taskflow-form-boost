@@ -1,295 +1,165 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../App';
+import { fetchTasks, updateTask } from '../services/taskService';
 import { getIcon } from '../utils/iconUtils';
-import { fetchTasks, createTask, updateTask } from '../services/taskService';
-import { fetchProjects } from '../services/projectService';
-
+import FloatingActionButton from '../components/FloatingActionButton';
 import NewTaskModal from '../components/tasks/NewTaskModal';
 
 const Tasks = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [taskForm, setTaskForm] = useState({
-    title: '',
-    description: '',
-    status: 'Not Started',
-    dueDate: '',
-    priority: 'Medium',
-    assignee: '',
-    projectId: ''
-  });
-  const [filterStatus, setFilterStatus] = useState('All');
-
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
   // Get icons
-  const PlusIcon = getIcon('Plus');
-  const LoaderIcon = getIcon('Loader');
-  const CheckCircleIcon = getIcon('CheckCircle');
+  const EditIcon = getIcon('Edit');
+  const CheckIcon = getIcon('Check');
   const ClockIcon = getIcon('Clock');
-  const AlertTriangleIcon = getIcon('AlertTriangle');
-  const XIcon = getIcon('X');
-  const CheckSquareIcon = getIcon('CheckSquare');
-  const FolderIcon = getIcon('Folder');
-  const UserIcon = getIcon('User');
-  const CalendarIcon = getIcon('Calendar');
-
-  // Load data
+  const AlertIcon = getIcon('AlertTriangle');
+  
+  // Redirect if not authenticated
   useEffect(() => {
-    const loadData = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+  
+  // Load tasks from the database
+  useEffect(() => {
+    const loadTasks = async () => {
       try {
         setIsLoading(true);
-        
-        // Load projects first
-        const projectData = await fetchProjects();
-        setProjects(projectData);
-        
-        // Then load tasks
-        const taskData = await fetchTasks();
-        setTasks(taskData);
-        
+        const tasksData = await fetchTasks();
+        setTasks(tasksData);
       } catch (error) {
-        toast.error("Failed to load data: " + error.message);
+        console.error("Error loading tasks:", error);
+        toast.error("Failed to load tasks. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
     
-    loadData();
-  }, []);
-
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setTaskForm({
-      ...taskForm,
-      [name]: value
-    });
-  };
-
-  // Open task modal for creation
-  const openNewTaskModal = () => {
-    setSelectedTask(null);
-    setTaskForm({
-      title: '',
-      description: '',
-      status: 'Not Started',
-      dueDate: '',
-      priority: 'Medium',
-      assignee: '',
-      projectId: ''
-    });
-    setIsTaskModalOpen(true);
-  };
-
-  // Open task modal for editing
-  const openEditTaskModal = (task) => {
-    setSelectedTask(task);
-    setTaskForm({
-      title: task.title,
-      description: task.description,
-      status: task.status,
-      dueDate: task.dueDate?.split('T')[0] || '',
-      priority: task.priority,
-      assignee: task.assignee,
-      projectId: task.project || ''
-    });
-    setIsTaskModalOpen(true);
-  };
-
-  // Handle task creation/update
-  const handleTaskSubmit = async (e) => {
-    // Reload tasks after successful task creation/update
-    try {  
-      const updatedTasks = await fetchTasks();
-      setTasks(updatedTasks);      
-      setIsTaskModalOpen(false);
-      return true;
-            
-    } catch (error) {
-      toast.error(selectedTask ? "Failed to update task" : "Failed to create task");
+    if (isAuthenticated) {
+      loadTasks();
     }
+  }, [isAuthenticated]);
+  
+  const handleEditTask = (task) => {
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
   };
-
-  // Handle status change for a task
+  
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      const taskToUpdate = tasks.find(task => task.Id === taskId);
-      await updateTask(taskId, { ...taskToUpdate, status: newStatus });
+      await updateTask(taskId, { status: newStatus });
       
-      // Update local state
+      // Update local state after successful update
       setTasks(tasks.map(task => 
         task.Id === taskId ? { ...task, status: newStatus } : task
       ));
       
       toast.success(`Task marked as ${newStatus}`);
     } catch (error) {
+      console.error("Error updating task status:", error);
       toast.error("Failed to update task status");
     }
   };
-
-  // Filter tasks by status
-  const filteredTasks = filterStatus === 'All' 
-    ? tasks 
-    : tasks.filter(task => task.status === filterStatus);
-
-  // If loading, show spinner
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <LoaderIcon className="animate-spin h-12 w-12 text-primary" />
-        <p className="ml-2 text-xl">Loading tasks...</p>
-      </div>
-    );
+  
+  const handleTaskUpdate = () => {
+    setIsEditModalOpen(false);
+    setSelectedTask(null);
+    
+    // Reload tasks after update
+    const loadTasks = async () => {
+      try {
+        const tasksData = await fetchTasks();
+        setTasks(tasksData);
+      } catch (error) {
+        console.error("Error reloading tasks:", error);
+      }
+    };
+    
+    loadTasks();
+  };
+  
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case 'High': return 'text-red-500';
+      case 'Medium': return 'text-orange-500';
+      case 'Low': return 'text-green-500';
+      default: return 'text-surface-500';
+    }
+  };
+  
+  if (!isAuthenticated) {
+    return null; // Don't render anything if not authenticated
   }
-
+  
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold">Tasks</h1>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex rounded-lg bg-white/30 dark:bg-surface-800/30 p-1 backdrop-blur-sm">
-            {['All', 'Not Started', 'In Progress', 'Completed'].map(status => (
-              <button
-                key={status}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  filterStatus === status
-                    ? 'bg-primary text-white'
-                    : 'hover:bg-white/20 dark:hover:bg-surface-700/30'
-                }`}
-                onClick={() => setFilterStatus(status)}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
-          <button 
-            onClick={openNewTaskModal}
-            className="btn-primary flex items-center justify-center"
-          >
-            <PlusIcon size={18} className="mr-1.5" />
-            New Task
-          </button>
+      <h1 className="text-3xl font-bold mb-8 text-surface-800 dark:text-surface-100">Tasks</h1>
+      
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </div>
-
-      {/* Tasks List */}
-      <div className="grid grid-cols-1 gap-4">
-        {filteredTasks.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-surface-500 dark:text-surface-400 mb-4">No tasks found</p>
-            <button 
-              onClick={openNewTaskModal}
-              className="btn-outline flex items-center justify-center mx-auto"
-            >
-              <PlusIcon size={18} className="mr-1.5" />
-              Create First Task
-            </button>
-          </div>
-        ) : (
-          filteredTasks.map(task => (
-            <motion.div
-              key={task.Id}
-              className="card-glass hover:shadow-lg"
+      ) : tasks.length === 0 ? (
+        <div className="text-center py-12">
+          <h3 className="text-xl text-surface-600 dark:text-surface-400 mb-4">No tasks found</h3>
+          <p className="text-surface-500 dark:text-surface-500">Create a new task to get started</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {tasks.map(task => (
+            <motion.div 
+              key={task.Id} 
+              className="p-5 rounded-xl bg-white/70 dark:bg-surface-800/70 backdrop-blur-md border border-white/50 dark:border-surface-700/50 shadow-sm hover:shadow-md transition-all"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col md:flex-row justify-between">
-                <div className="flex-1">
-                  <h3 
-                    className="text-xl font-bold mb-2 cursor-pointer hover:text-primary"
-                    onClick={() => openEditTaskModal(task)}
-                  >
-                    {task.title}
-                  </h3>
-                  <p className="text-surface-600 dark:text-surface-400 mb-4">{task.description}</p>
-                  
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="flex items-center text-sm bg-surface-200/50 dark:bg-surface-700/50 px-3 py-1 rounded-full">
-                      <FolderIcon size={14} className="mr-1.5 text-primary" />
-                      {projects.find(p => p.Id === task.project)?.Name || 'No Project'}
-                    </div>
-                    
-                    <div className="flex items-center text-sm bg-surface-200/50 dark:bg-surface-700/50 px-3 py-1 rounded-full">
-                      <UserIcon size={14} className="mr-1.5 text-tertiary" />
-                      {task.assignee || 'Unassigned'}
-                    </div>
-                    
-                    <div className="flex items-center text-sm bg-surface-200/50 dark:bg-surface-700/50 px-3 py-1 rounded-full">
-                      <CalendarIcon size={14} className="mr-1.5 text-secondary" />
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
-                    </div>
-                    
-                    <div className={`flex items-center text-sm px-3 py-1 rounded-full ${
-                      task.priority === 'High' 
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
-                        : task.priority === 'Medium'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`}>
-                      <AlertTriangleIcon size={14} className="mr-1.5" />
-                      {task.priority} Priority
-                    </div>
-                  </div>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">{task.title}</h3>
+                  <p className="text-surface-600 dark:text-surface-400 text-sm line-clamp-2">{task.description}</p>
                 </div>
-                
-                <div className="flex md:flex-col gap-2 mt-4 md:mt-0 md:ml-4">
-                  <button 
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center ${
-                      task.status === 'Completed'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                        : task.status === 'In Progress'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
-                    }`}
-                  >
-                    {task.status === 'Completed' ? (
-                      <CheckCircleIcon size={14} className="mr-1.5" />
-                    ) : task.status === 'In Progress' ? (
-                      <ClockIcon size={14} className="mr-1.5" />
-                    ) : (
-                      <CheckSquareIcon size={14} className="mr-1.5" />
-                    )}
-                    {task.status}
+                <div className="flex space-x-2">
+                  <button onClick={() => handleEditTask(task)} className="p-2 rounded-full bg-surface-200/70 dark:bg-surface-700/70 hover:bg-surface-300/70 dark:hover:bg-surface-600/70 transition-colors">
+                    <EditIcon size={16} />
                   </button>
-                  
                   {task.status !== 'Completed' && (
-                    <button
-                      onClick={() => handleStatusChange(task.Id, 'Completed')}
-                      className="px-3 py-1.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-lg text-sm font-medium flex items-center"
-                    >
-                      <CheckCircleIcon size={14} className="mr-1.5" />
-                      Mark Complete
-                    </button>
-                  )}
-                  
-                  {task.status === 'Not Started' && (
-                    <button
-                      onClick={() => handleStatusChange(task.Id, 'In Progress')}
-                      className="px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg text-sm font-medium flex items-center"
-                    >
-                      <ClockIcon size={14} className="mr-1.5" />
-                      Start Task
+                    <button onClick={() => handleStatusChange(task.Id, 'Completed')} className="p-2 rounded-full bg-green-100/70 dark:bg-green-900/30 hover:bg-green-200/70 dark:hover:bg-green-800/30 text-green-600 dark:text-green-400 transition-colors">
+                      <CheckIcon size={16} />
                     </button>
                   )}
                 </div>
               </div>
+              <div className="mt-3 flex items-center space-x-4 text-xs text-surface-500 dark:text-surface-400">
+                <span className={`font-medium ${getPriorityColor(task.priority)}`}>{task.priority}</span>
+                <span>{task.status}</span>
+                <span>{task.dueDate && new Date(task.dueDate).toLocaleDateString()}</span>
+                {task.assignee && <span>{task.assignee}</span>}
+              </div>
             </motion.div>
-          ))
-        )}
-      </div>
-
-      {/* Task Modal */}
-      <NewTaskModal 
-        isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
-        task={selectedTask}
-        initialProject={selectedTask?.project || ''}
-        onSuccess={handleTaskSubmit}
-      />
+          ))}
+        </div>
+      )}
       
+      <FloatingActionButton />
+      
+      {isEditModalOpen && (
+        <NewTaskModal 
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          task={selectedTask}
+          onSuccess={handleTaskUpdate}
+        />
+      )}
     </div>
   );
 };
